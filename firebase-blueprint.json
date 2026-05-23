@@ -1,0 +1,41 @@
+{
+  "entities": {
+    "User": {
+      "title": "User Profile",
+      "description": "Information about registered developers",
+      "type": "object",
+      "properties": {
+        "userId": { "type": "string", "description": "Unique user ID" },
+        "email": { "type": "string", "format": "email", "description": "Developer email" },
+        "displayName": { "type": "string", "description": "Display name" },
+        "createdAt": { "type": "string", "format": "date-time", "description": "Account registration timestamp" },
+        "updatedAt": { "type": "string", "format": "date-time", "description": "Last profile update timestamp" }
+      },
+      "required": ["userId", "email"]
+    },
+    "Share": {
+      "title": "Shared Asset",
+      "description": "Shared workspace scans containing alignment status and telemetry details",
+      "type": "object",
+      "properties": {
+        "shareId": { "type": "string", "description": "Unique share ID" },
+        "ownerId": { "type": "string", "description": "User who shared the scan" },
+        "pct": { "type": "integer", "description": "Alignment score percentage" },
+        "statusLabel": { "type": "string", "description": "Alignment status label" },
+        "description": { "type": "string", "description": "Assessment breakdown" },
+        "sharedAt": { "type": "string", "format": "date-time", "description": "Date-time the scan was shared" }
+      },
+      "required": ["shareId", "ownerId", "pct"]
+    }
+  },
+  "firestore": {
+    "users/{userId}": {
+      "schema": "User",
+      "description": "User profile collection"
+    },
+    "shares/{shareId}": {
+      "schema": "Share",
+      "description": "Shared scanning results"
+    }
+  }
+}

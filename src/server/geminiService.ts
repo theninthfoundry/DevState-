@@ -1,11 +1,25 @@
 import { GoogleGenAI, Type } from "@google/genai";
 import { WorkspaceSummary } from "./workspaceScanner";
 
-const apiKey = process.env.GEMINI_API_KEY;
+let lastUsedApiKey = "";
+let isProjectDenied = false;
+let isQuotaExceeded = false;
+let aiClient: GoogleGenAI | null = null;
+
+function getApiKey(): string | undefined {
+  const currentKey = process.env.GEMINI_API_KEY;
+  if (currentKey !== lastUsedApiKey) {
+    lastUsedApiKey = currentKey || "";
+    isProjectDenied = false;
+    isQuotaExceeded = false;
+    aiClient = null;
+  }
+  return currentKey;
+}
 
 // Lazy initialization helper safely handles missing key gracefully
-let aiClient: GoogleGenAI | null = null;
 function getGeminiClient(): GoogleGenAI {
+  const apiKey = getApiKey();
   if (!aiClient) {
     if (!apiKey) {
       console.log("DevState Notification: GEMINI_API_KEY environment variable is not defined. Falling back to local states.");
@@ -37,9 +51,16 @@ export async function analyzeProjectState(
   workspaceSummary: WorkspaceSummary,
   terminalLogs: string = ""
 ): Promise<StateAnalysisResult> {
-  // If no Gemini key is set, return highly realistic mocked/compiled analysis to prevent crashing and ensure standard operation
-  if (!apiKey) {
-    return generateFallbackState(visionSpec, workspaceSummary);
+  const apiKey = getApiKey();
+  
+  // If no Gemini key is set or project key is blocked/exhausted, instantly return local high-fidelity analysis to prevent timeouts
+  if (!apiKey || isProjectDenied || isQuotaExceeded) {
+    const fakeError = isProjectDenied 
+      ? new Error("PERMISSION_DENIED: Your project has been denied access.") 
+      : isQuotaExceeded 
+        ? new Error("RESOURCE_EXHAUSTED: You exceeded your current quota.") 
+        : undefined;
+    return generateFallbackState(visionSpec, workspaceSummary, fakeError);
   }
 
   const ai = getGeminiClient();
@@ -180,6 +201,16 @@ Ensure you return a valid JSON object matching the requested schema. Do not incl
       return JSON.parse(text) as StateAnalysisResult;
     } catch (err: any) {
       lastError = err;
+      const errMsg = err.message || String(err);
+      if (errMsg.includes("PERMISSION_DENIED") || errMsg.includes("403") || errMsg.includes("denied access")) {
+        isProjectDenied = true;
+        console.log("DevState Insight: Early breaking model loop due to project-wide PERMISSION_DENIED (403).");
+        break;
+      } else if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("limit") || errMsg.includes("exhausted")) {
+        isQuotaExceeded = true;
+        console.log("DevState Insight: Early breaking model loop due to project-wide RESOURCE_EXHAUSTED (429).");
+        break;
+      }
     }
   }
 
@@ -203,8 +234,14 @@ export async function askAssistant(
   visionSpec: string,
   workspaceSummary: WorkspaceSummary
 ): Promise<string> {
-  if (!apiKey) {
-    return `[Local State Mock Mode (GEMINI_API_KEY is not defined)]: I have analyzed your question about "${question}". Given the current repository size of ${workspaceSummary.files.length} files, you should complete the main front-end components and run ts-node servers. To unlock full real-time AI capabilities, configure your key in settings secrets!`;
+  const apiKey = getApiKey();
+  if (!apiKey || isProjectDenied || isQuotaExceeded) {
+    const hint = isProjectDenied
+      ? "This indicates that the current Google Cloud Project hosting this key is denied access or suspended (403)."
+      : isQuotaExceeded
+        ? "This indicates that the configured API key has exceeded its rate limits or available quota allocation (429)."
+        : "GEMINI_API_KEY is not defined.";
+    return `[DevState Alert / Local Interactive Mode]: The configured GEMINI_API_KEY returned an API restriction error. ${hint} DevState has temporarily engaged an interactive offline guide to support your build. You can update your API credentials in "Settings > Secrets" at any time. Given the current repository size of ${workspaceSummary.files.length} files, you should complete the main front-end components and run ts-node servers.`;
   }
 
   const ai = getGeminiClient();
@@ -241,6 +278,16 @@ Be technical, concise, supportive, and highly prescriptive. Offer ready-to-use T
       return res.text || "No response received.";
     } catch (err: any) {
       lastError = err;
+      const errMsg = err.message || String(err);
+      if (errMsg.includes("PERMISSION_DENIED") || errMsg.includes("403") || errMsg.includes("denied access")) {
+        isProjectDenied = true;
+        console.log("DevState Insight: Early breaking assistant loop due to project-wide PERMISSION_DENIED (403).");
+        break;
+      } else if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("limit") || errMsg.includes("exhausted")) {
+        isQuotaExceeded = true;
+        console.log("DevState Insight: Early breaking assistant loop due to project-wide RESOURCE_EXHAUSTED (429).");
+        break;
+      }
     }
   }
 
@@ -389,7 +436,8 @@ export async function analyzeCognitionTool(
   workspaceSummary: WorkspaceSummary,
   visionSpec: string
 ): Promise<any> {
-  const isDemo = !apiKey;
+  const apiKey = getApiKey();
+  const isDemo = !apiKey || isProjectDenied || isQuotaExceeded;
   const ai = getGeminiClient();
 
   // If we have an API Key, run it through the cognitive model gateway
@@ -477,6 +525,15 @@ Do not include markdown wraps like \`\`\`json. Return pure JSON string.
         } catch (e: any) {
           lastError = e;
           const errMsg = e?.message || String(e);
+          if (errMsg.includes("PERMISSION_DENIED") || errMsg.includes("403") || errMsg.includes("denied access")) {
+            isProjectDenied = true;
+            console.log(`DevState Insight: Early breaking route for ${toolId} due to global project exclusion (403).`);
+            break;
+          } else if (errMsg.includes("429") || errMsg.includes("quota") || errMsg.includes("limit") || errMsg.includes("exhausted")) {
+            isQuotaExceeded = true;
+            console.log(`DevState Insight: Early breaking route for ${toolId} due to global quota exhaustion (429).`);
+            break;
+          }
           console.warn(`DevState Hub: Model ${model} failed for ${toolId} (${errMsg}). Trying next fallback model...`);
         }
       }

@@ -55,7 +55,42 @@ function getFilesRecursive(dir: string, baseDir: string = dir): string[] {
   return results;
 }
 
+let lastScanTime = 0;
+let lastSummary: WorkspaceSummary | null = null;
+let fileEditEventDetected = false;
+let watcherInitialized = false;
+
+function initWatcher(workspaceRoot: string) {
+  if (watcherInitialized) return;
+  watcherInitialized = true;
+  try {
+    fs.watch(workspaceRoot, { recursive: true }, (eventType, filename) => {
+      if (filename) {
+        if (
+          filename.includes('node_modules') ||
+          filename.includes('.git') ||
+          filename.includes('dist') ||
+          filename.includes('.next') ||
+          filename.includes('.cache')
+        ) {
+          return;
+        }
+        fileEditEventDetected = true;
+      }
+    });
+  } catch (err) {
+    console.warn("fs.watch recursive bypass active; using timer TTL.", err);
+  }
+}
+
 export function scanWorkspace(workspaceRoot: string): WorkspaceSummary {
+  initWatcher(workspaceRoot);
+
+  const now = Date.now();
+  if (lastSummary && !fileEditEventDetected && (now - lastScanTime < 10000)) {
+    return lastSummary;
+  }
+
   const summary: WorkspaceSummary = {
     files: [],
     dependencies: [],
@@ -175,5 +210,8 @@ export function scanWorkspace(workspaceRoot: string): WorkspaceSummary {
     console.error('Failed to complete workspace scan:', err);
   }
 
+  fileEditEventDetected = false;
+  lastScanTime = Date.now();
+  lastSummary = summary;
   return summary;
 }
