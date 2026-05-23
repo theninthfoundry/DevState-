@@ -1,0 +1,135 @@
+@import url('https://fonts.googleapis.com/css2?family=Sora:wght@100;300;400;500;600;700;800&family=Syne:wght@700;800&family=JetBrains+Mono:wght@400;500;700&display=swap');
+@import "tailwindcss";
+
+@theme {
+  --font-sans: "Sora", "Inter", ui-sans-serif, system-ui, sans-serif;
+  --font-display: "Syne", sans-serif;
+  --font-mono: "JetBrains Mono", ui-monospace, SFMono-Regular, monospace;
+}
+
+/* Premium smooth ambient drift auroras with organic movement */
+@keyframes fluid-drift-one {
+  0% { transform: translate(0, 0) scale(1) rotate(0deg); filter: blur(120px) opacity(0.3); }
+  33% { transform: translate(6%, 8%) scale(1.15) rotate(120deg); filter: blur(140px) opacity(0.45); }
+  66% { transform: translate(-4%, 10%) scale(0.9) rotate(240deg); filter: blur(110px) opacity(0.25); }
+  100% { transform: translate(0, 0) scale(1) rotate(360deg); filter: blur(120px) opacity(0.3); }
+}
+
+@keyframes fluid-drift-two {
+  0% { transform: translate(0, 0) scale(1.1) rotate(360deg); filter: blur(150px) opacity(0.35); }
+  50% { transform: translate(-8%, -5%) scale(0.85) rotate(180deg); filter: blur(130px) opacity(0.2); }
+  100% { transform: translate(0, 0) scale(1.1) rotate(0deg); filter: blur(150px) opacity(0.35); }
+}
+
+@keyframes pulse-glowing {
+  0%, 100% { opacity: 0.25; }
+  50% { opacity: 0.55; }
+}
+
+/* Custom glow utility and glassmorphism styling */
+.glow-purple {
+  box-shadow: 0 0 50px -10px rgba(167, 139, 250, 0.15);
+}
+
+.glass-panel {
+  background: rgba(8, 9, 15, 0.45);
+  backdrop-filter: blur(12px) saturate(140%);
+  border: 1px solid rgba(255, 255, 255, 0.04);
+}
+
+.glass-panel-heavy {
+  background: rgba(6, 7, 12, 0.85);
+  backdrop-filter: blur(20px) saturate(160%);
+  border: 1px solid rgba(255, 255, 255, 0.07);
+}
+
+/* Grid overlay background resembling Google Labs */
+.grid-mesh {
+  background-size: 30px 30px;
+  background-image: linear-gradient(to right, rgba(255, 255, 255, 0.015) 1px, transparent 1px),
+                    linear-gradient(to bottom, rgba(255, 255, 255, 0.015) 1px, transparent 1px);
+}
+
+.animate-drift-1 {
+  animation: fluid-drift-one 22s infinite ease-in-out;
+}
+
+.animate-drift-2 {
+  animation: fluid-drift-two 28s infinite ease-in-out;
+}
+
+/* Rounded, friendly hover styles */
+.btn-premium {
+  @apply relative overflow-hidden rounded-full font-sans transition-all duration-300 active:scale-95 border font-semibold;
+}
+
+/* Precise CSS selector for premium labs-header layout enhancements */
+#labs-header {
+  position: relative;
+  transition: all 0.5s cubic-bezier(0.16, 1, 0.3, 1), border-color 0.4s ease, box-shadow 0.4s ease;
+  background: rgba(10, 10, 16, 0.6);
+  backdrop-filter: blur(30px);
+  -webkit-backdrop-filter: blur(30px);
+  border: 1px solid rgba(255, 255, 255, 0.1);
+  border-radius: 1.75rem;
+  padding: 1.25rem 1.75rem;
+  margin-bottom: 2rem;
+  box-shadow: 0 12px 40px -10px rgba(0, 0, 0, 0.6);
+}
+
+#labs-header:hover {
+  border-color: rgba(167, 139, 250, 0.3);
+  box-shadow: 0 16px 48px -8px rgba(167, 139, 250, 0.05), 0 12px 40px -10px rgba(0, 0, 0, 0.7);
+}
+
+#labs-header::after {
+  content: '';
+  position: absolute;
+  bottom: 0;
+  left: 0;
+  right: 0;
+  height: 1px;
+  background: linear-gradient(90deg, transparent, rgba(167, 139, 250, 0.15) 20%, rgba(167, 139, 250, 0.15) 80%, transparent);
+  pointer-events: none;
+}
+
+/* Responsive float keyframes and class for the System Status pulse badge */
+@keyframes float-status {
+  0% {
+    transform: translateY(0px);
+    box-shadow: 0 4px 20px -2px var(--shadow-color, rgba(139, 92, 246, 0.15));
+  }
+  50% {
+    transform: translateY(-4px);
+    box-shadow: 0 12px 28px 2px var(--shadow-color, rgba(139, 92, 246, 0.3));
+  }
+  100% {
+    transform: translateY(0px);
+    box-shadow: 0 4px 20px -2px var(--shadow-color, rgba(139, 92, 246, 0.15));
+  }
+}
+
+.animate-float-status {
+  animation: float-status 4s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+
+/* Dynamic color-shifting animation for pulse indicator transitioning between state base color, violet, and white */
+@keyframes pulse-color-shift {
+  0%, 100% {
+    background-color: var(--pulse-color, #c084fc);
+    box-shadow: 0 0 10px var(--pulse-color, #c084fc);
+  }
+  33% {
+    background-color: #8b5cf6; /* Vibrant Violet */
+    box-shadow: 0 0 16px #8b5cf6;
+  }
+  66% {
+    background-color: #ffffff; /* Elegant Pure White */
+    box-shadow: 0 0 14px #ffffff;
+  }
+}
+
+.animate-pulse-color-shift {
+  animation: pulse-color-shift 3.5s cubic-bezier(0.4, 0, 0.2, 1) infinite;
+}
+

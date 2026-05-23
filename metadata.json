@@ -1,0 +1,6 @@
+{
+  "name": "DevState Workspace Tracker",
+  "description": "An autonomous software project state engine and real-time dashboard that tracks vision alignment, dependencies, mock statuses, and context recovery.",
+  "requestFramePermissions": [],
+  "majorCapabilities": ["MAJOR_CAPABILITY_SERVER_SIDE_GEMINI_API"]
+}
