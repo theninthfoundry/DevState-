@@ -1,3 +1,4 @@
+import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Cpu, 
@@ -36,7 +37,8 @@ import {
   Code,
   Sliders,
   AlertOctagon,
-  Gauge
+  Gauge,
+  XCircle
 } from 'lucide-react';
 
 interface SupremeOSControlPanelProps {
@@ -53,6 +55,28 @@ export default function SupremeOSControlPanel({
   // STATE MANAGEMENT FOR ACTIVE VIEWS: 'engines' | 'pricing'
   const [activeTab, setActiveTab] = useState<'engines' | 'pricing'>('engines');
   const [activeInnovation, setActiveInnovation] = useState<number>(0);
+
+  // WORKSPACE SCAN ERRORS ALERTS
+  const [scanErrors, setScanErrors] = useState<Array<{ id: string; title: string; description: string; type: 'error' | 'warning' }>>([
+    {
+      id: 'ERR-749',
+      title: 'Cyclic Dependency Detected',
+      description: 'Circular import observed between `src/components/NexusAndForge.tsx` and `src/App.tsx`. Refactor extracted shared states to `src/store/` to prevent memory leaks.',
+      type: 'error'
+    },
+    {
+      id: 'WRN-112',
+      title: 'Unoptimized GPU Handlers',
+      description: 'Three.js canvas contexts in `ArchitectureNebula` are mounting without manual dispose handlers. Potential VRAM saturation in long sessions.',
+      type: 'warning'
+    }
+  ]);
+
+  const dismissError = (id: string, e: React.MouseEvent) => {
+    e.stopPropagation();
+    setScanErrors(prev => prev.filter(err => err.id !== id));
+    playClick(1.3);
+  };
   
   // 1. Holographic Architecture Universe
   const [archHoveredNode, setArchHoveredNode] = useState<string | null>(null);
@@ -185,25 +209,25 @@ export default function SupremeOSControlPanel({
 
   // 20 COMPLETE STRATEGIC INNOVATIONS METADATA
   const innovations = [
-    { id: 1, name: "Holographic Architecture Universe", icon: Layers, accent: "text-violet-400", bgAccent: "bg-violet-950/25", desc: "Cinematic 3D-linked software dependency graph showing service tension, bottleneck radiation, and file clusters.", badge: "Cinematic" },
-    { id: 2, name: "Engineering Time Machine", icon: Clock, accent: "text-emerald-400", bgAccent: "bg-emerald-950/25", desc: "Replay codebase architecture evolution, technical debt accumulation, and historical file-growth timelines.", badge: "Scrubbable" },
-    { id: 3, name: "AI Engineering Memory", icon: BookOpen, accent: "text-blue-400", bgAccent: "bg-blue-950/25", desc: "Retrieves past architectural decisions, solved debugging loops, and historical scaling incidents directly from indexing.", badge: "Semantic" },
+    { id: 1, name: "Holographic Architecture Universe", icon: Layers, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Cinematic 3D-linked software dependency graph showing service tension, bottleneck radiation, and file clusters.", badge: "Cinematic" },
+    { id: 2, name: "Engineering Time Machine", icon: Clock, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Replay codebase architecture evolution, technical debt accumulation, and historical file-growth timelines.", badge: "Scrubbable" },
+    { id: 3, name: "AI Engineering Memory", icon: BookOpen, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Retrieves past architectural decisions, solved debugging loops, and historical scaling incidents directly from indexing.", badge: "Semantic" },
     { id: 4, name: "Self-Healing Infrastructure", icon: Wrench, accent: "text-rose-450 text-rose-400", bgAccent: "bg-rose-950/25", desc: "Automated real-time AST audits, dead code sifting, CORS config patching, and imports self-repair.", badge: "Autonomous" },
     { id: 5, name: "AI Flow State Engine", icon: Activity, accent: "text-amber-400", bgAccent: "bg-amber-950/25", desc: "Monitors context switching, diagnostic looping velocity, and burnout signals to optimize developer focus.", badge: "Bio-Cognitive" },
-    { id: 6, name: "Vision-to-Code Intelligence", icon: Sparkles, accent: "text-indigo-400", bgAccent: "bg-indigo-950/25", desc: "Translate high-level feature notes to complete schema updates, websocket specs, and estimated implementation maturity.", badge: "Predictive" },
-    { id: 7, name: "AI Deployment Orchestrator", icon: ShieldCheck, accent: "text-teal-400", bgAccent: "bg-teal-950/25", desc: "Pre-flight environment variable validation, workspace drift scans, bundle volume metrics, and production safety scores.", badge: "Preflight" },
+    { id: 6, name: "Vision-to-Code Intelligence", icon: Sparkles, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Translate high-level feature notes to complete schema updates, websocket specs, and estimated implementation maturity.", badge: "Predictive" },
+    { id: 7, name: "AI Deployment Orchestrator", icon: ShieldCheck, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Pre-flight environment variable validation, workspace drift scans, bundle volume metrics, and production safety scores.", badge: "Preflight" },
     { id: 8, name: "Live Chaos Engine", icon: Flame, accent: "text-red-400", bgAccent: "bg-red-950/25", desc: "Simulate API outages, database congestion, rate limit errors, and analyze cascading service failovers on port 3000.", badge: "Chaos Simulator" },
     { id: 9, name: "AI Security Observatory", icon: ShieldAlert, accent: "text-pink-400", bgAccent: "bg-pink-950/25", desc: "Live attack-vector scanners, wildcard credential leakage traps, and dynamic security hotspot mapping.", badge: "Sentry" },
     { id: 10, name: "Product Genome Engine", icon: Workflow, accent: "text-cyan-400", bgAccent: "bg-cyan-950/25", desc: "Interactive monetization readiness, observability health, and UX fidelity mapping into a comprehensive readiness index.", badge: "Strategic" },
-    { id: 11, name: "API Intelligence Matrix", icon: Radio, accent: "text-emerald-400", bgAccent: "bg-emerald-950/25", desc: "Monitor endpoints health, latency variations and dynamic auth parameters across system APIs on port 3000.", badge: "API Matrix" },
-    { id: 12, name: "Database Evolution Observatory", icon: Database, accent: "text-indigo-400", bgAccent: "bg-indigo-950/25", desc: "Check DB migration risks, column typings mapping, relational decay factor and active column constraints index.", badge: "DB Schema" },
+    { id: 11, name: "API Intelligence Matrix", icon: Radio, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Monitor endpoints health, latency variations and dynamic auth parameters across system APIs on port 3000.", badge: "API Matrix" },
+    { id: 12, name: "Database Evolution Observatory", icon: Database, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Check DB migration risks, column typings mapping, relational decay factor and active column constraints index.", badge: "DB Schema" },
     { id: 13, name: "Event Flow Visualizer", icon: Unplug, accent: "text-amber-400", bgAccent: "bg-amber-950/25", desc: "Live asynchronous retry streams, event-bus packet queues, backpressure alerts and job loop delays tracking.", badge: "Asynchronous" },
     { id: 14, name: "Security Posture Lens", icon: Lock, accent: "text-rose-400", bgAccent: "bg-rose-950/25", desc: "Validate access logs, exposed secrets, wildcard keys and user access privilege escalation hazards.", badge: "Threat Matrix" },
-    { id: 15, name: "Performance Pressure Maps", icon: Gauge, accent: "text-teal-400", bgAccent: "bg-teal-950/25", desc: "Interactive visual performance terrain layout tracking hydration lag factors, REST delays and runtime shifts.", badge: "Terrain Map" },
+    { id: 15, name: "Performance Pressure Maps", icon: Gauge, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Interactive visual performance terrain layout tracking hydration lag factors, REST delays and runtime shifts.", badge: "Terrain Map" },
     { id: 16, name: "Feature Lifecycle Tracker", icon: TrendingUp, accent: "text-cyan-400", bgAccent: "bg-cyan-950/25", desc: "Track progress from user tickets/concepts to alpha, beta, shipping, validation, and historical deprecations.", badge: "Product Lift" },
-    { id: 17, name: "Decision Vault", icon: HelpCircle, accent: "text-indigo-400", bgAccent: "bg-indigo-950/25", desc: "Record the historical 'why' of key architecture decisions, framework tradeoffs, and SDK code integrations.", badge: "Rationale" },
-    { id: 18, name: "AI Code Review Agent", icon: Code, accent: "text-violet-400", bgAccent: "bg-violet-950/25", desc: "Interactive automated lint reviews testing system structure against enterprise standards.", badge: "Scorecard" },
-    { id: 19, name: "Command Palette Launcher", icon: Terminal, accent: "text-sky-400", bgAccent: "bg-sky-950/25", desc: "Command-driven search sifter and automation engine for the ultimate operation command deck.", badge: "OS Commander" },
+    { id: 17, name: "Decision Vault", icon: HelpCircle, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Record the historical 'why' of key architecture decisions, framework tradeoffs, and SDK code integrations.", badge: "Rationale" },
+    { id: 18, name: "AI Code Review Agent", icon: Code, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Interactive automated lint reviews testing system structure against enterprise standards.", badge: "Scorecard" },
+    { id: 19, name: "Command Palette Launcher", icon: Terminal, accent: "text-zinc-300", bgAccent: "bg-white/5", desc: "Command-driven search sifter and automation engine for the ultimate operation command deck.", badge: "OS Commander" },
     { id: 20, name: "Team Copilot Rooms", icon: Users, accent: "text-fuchsia-400", bgAccent: "bg-fuchsia-950/25", desc: "Synchronized dual developer workspace simulation checking alignment gaps across connected team accounts.", badge: "Collaboration" }
   ];
 
@@ -449,20 +473,20 @@ export default function SupremeOSControlPanel({
       
       {/* SECTION MASTER HEADER BLOCK */}
       <div className="relative overflow-hidden p-6 rounded-3xl bg-[#090b11]/90 border border-slate-800/80 shadow-2xl flex flex-col xl:flex-row xl:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-violet-600/5 rounded-full blur-3xl pointer-events-none"></div>
-        <div className="absolute top-0 left-0 w-40 h-40 bg-[#10b981]/5 rounded-full blur-2xl pointer-events-none"></div>
+        <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-800 rounded-full blur-3xl pointer-events-none"></div>
+        <div className="absolute top-0 left-0 w-40 h-40 bg-[#d4d4d8]/5 rounded-full blur-2xl pointer-events-none"></div>
         
         <div className="flex items-center gap-4 relative">
-          <div className="p-4 bg-gradient-to-tr from-violet-600/15 to-indigo-600/15 rounded-2.5xl border border-violet-500/25 text-[#c084fc] relative shrink-0">
-            <Cpu className="w-10 h-10 animate-spin-slow text-violet-400" />
-            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-emerald-500 rounded-full animate-ping"></span>
+          <div className="p-4 bg-gradient-to-tr from-zinc-800/15 to-zinc-900/15 rounded-2.5xl border border-white/10 text-[#c084fc] relative shrink-0">
+            <Cpu className="w-10 h-10 animate-spin-slow text-zinc-300" />
+            <span className="absolute -top-1 -right-1 w-3.5 h-3.5 bg-zinc-800 rounded-full animate-ping"></span>
           </div>
           <div>
             <div className="flex flex-wrap items-center gap-2">
-              <span className="text-[9px] bg-[#8b5cf6]/20 text-[#c084fc] font-black tracking-widest font-mono uppercase px-2.5 py-0.5 rounded-full border border-[#8b5cf6]/30">
+              <span className="text-[9px] bg-[#d4d4d8]/20 text-[#c084fc] font-black tracking-widest font-mono uppercase px-2.5 py-0.5 rounded-full border border-[#d4d4d8]/30">
                 MASTER BLUEPRINT COCKPIT
               </span>
-              <span className="text-[10px] text-emerald-400 font-mono tracking-wider font-extrabold flex items-center gap-1">
+              <span className="text-[10px] text-zinc-300 font-mono tracking-wider font-extrabold flex items-center gap-1">
                 ● COGNITION RUNTIME ONLINE
               </span>
             </div>
@@ -478,21 +502,21 @@ export default function SupremeOSControlPanel({
         {/* Dynamic score dashboard summary */}
         <div className="flex items-center gap-3 shrink-0">
           <div className="p-4 bg-[#07080c] border border-slate-800/60 rounded-2.5xl min-w-[130px] text-center">
-            <span className="text-[8px] uppercase font-mono tracking-widest text-violet-400 block font-bold">ALIGNMENT INDEX</span>
+            <span className="text-[8px] uppercase font-mono tracking-widest text-zinc-300 block font-bold">ALIGNMENT INDEX</span>
             <span className="text-3xl font-black text-white mt-0.5 font-sans">
               98.2%
             </span>
-            <span className="text-[9px] font-mono text-emerald-400 font-bold block mt-0.5 tracking-wide uppercase">
+            <span className="text-[9px] font-mono text-zinc-300 font-bold block mt-0.5 tracking-wide uppercase">
               AST COHERENT
             </span>
           </div>
           
           <div className="p-4 bg-[#07080c] border border-slate-800/60 rounded-2.5xl min-w-[130px] text-center">
-            <span className="text-[8px] uppercase font-mono tracking-widest text-[#10b981] block font-bold">RUNTIME HEALTH</span>
+            <span className="text-[8px] uppercase font-mono tracking-widest text-[#d4d4d8] block font-bold">RUNTIME HEALTH</span>
             <span className="text-3xl font-black text-white mt-0.5 font-sans">
               99.9%
             </span>
-            <span className="text-[9px] font-mono text-emerald-400 font-bold block mt-0.5 tracking-wide uppercase">
+            <span className="text-[9px] font-mono text-zinc-300 font-bold block mt-0.5 tracking-wide uppercase">
               14ms RESP
             </span>
           </div>
@@ -506,11 +530,11 @@ export default function SupremeOSControlPanel({
             onClick={() => { setActiveTab('engines'); playClick(1.0); }}
             className={`px-4.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer border ${
               activeTab === 'engines' 
-                ? 'bg-gradient-to-r from-violet-950/40 to-indigo-950/40 border-violet-500/30 text-white shadow-lg' 
+                ? 'bg-gradient-to-r from-violet-950/40 to-indigo-950/40 border-white/10 text-white shadow-lg' 
                 : 'bg-transparent border-transparent text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
-            <Sliders className="w-4 h-4 text-violet-400" />
+            <Sliders className="w-4 h-4 text-zinc-300" />
             <span>20 COGNITIVE SYSTEMS MATRIX</span>
           </button>
           
@@ -518,13 +542,13 @@ export default function SupremeOSControlPanel({
             onClick={() => { setActiveTab('pricing'); playClick(1.1); }}
             className={`px-4.5 py-2 rounded-xl text-xs font-mono font-bold transition-all flex items-center gap-2 cursor-pointer border ${
               activeTab === 'pricing' 
-                ? 'bg-gradient-to-r from-violet-950/40 to-indigo-950/40 border-violet-500/30 text-white shadow-lg' 
+                ? 'bg-gradient-to-r from-violet-950/40 to-indigo-950/40 border-white/10 text-white shadow-lg' 
                 : 'bg-transparent border-transparent text-slate-400 hover:text-white hover:bg-slate-900/40'
             }`}
           >
-            <DollarSign className="w-4 h-4 text-emerald-400" />
+            <DollarSign className="w-4 h-4 text-zinc-300" />
             <span>PRODUCT LICENSE & REVENUE TIERS</span>
-            <span className="text-[8px] bg-emerald-500/10 text-emerald-400 font-bold px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+            <span className="text-[8px] bg-zinc-800 text-zinc-300 font-bold px-1.5 py-0.5 rounded-full border border-white/10">
               PROVE
             </span>
           </button>
@@ -535,18 +559,69 @@ export default function SupremeOSControlPanel({
         </div>
       </div>
 
+      {/* ERROR DIAGNOSTIC DISPLAY AREA */}
+      <AnimatePresence>
+        {scanErrors.length > 0 && (
+          <motion.div 
+            initial={{ opacity: 0, height: 0 }} 
+            animate={{ opacity: 1, height: 'auto' }} 
+            exit={{ opacity: 0, height: 0 }} 
+            className="flex flex-col gap-3 overflow-hidden"
+          >
+            {scanErrors.map(err => (
+              <motion.div 
+                key={err.id}
+                layout
+                initial={{ opacity: 0, x: -20 }}
+                animate={{ opacity: 1, x: 0 }}
+                exit={{ opacity: 0, scale: 0.95 }}
+                className={`p-4 rounded-2xl border flex items-start gap-4 shadow-lg ${
+                  err.type === 'error' 
+                    ? 'bg-rose-950/20 border-rose-500/30 text-rose-200' 
+                    : 'bg-amber-950/20 border-amber-500/30 text-amber-200'
+                }`}
+              >
+                <div className="pt-1">
+                  {err.type === 'error' ? <AlertOctagon className="w-5 h-5 text-rose-500" /> : <AlertTriangle className="w-5 h-5 text-amber-500" />}
+                </div>
+                <div className="flex-1 min-w-0">
+                  <div className="flex items-center gap-2 mb-1">
+                    <span className={`text-[10px] uppercase font-mono font-bold tracking-wider px-2 py-0.5 rounded-full ${
+                      err.type === 'error' ? 'bg-rose-500/20 text-rose-400' : 'bg-amber-500/20 text-amber-400'
+                    }`}>
+                      {err.id}
+                    </span>
+                    <h4 className="text-sm font-bold truncate">{err.title}</h4>
+                  </div>
+                  <p className={`text-xs leading-relaxed ${err.type === 'error' ? 'text-rose-300' : 'text-amber-300'}`}>
+                    {err.description}
+                  </p>
+                </div>
+                <button 
+                  onClick={(e) => dismissError(err.id, e)}
+                  className={`p-1.5 rounded-lg hover:bg-black/20 transition-colors ${err.type === 'error' ? 'text-rose-400 hover:text-rose-300' : 'text-amber-400 hover:text-amber-300'}`}
+                >
+                  <XCircle className="w-5 h-5" />
+                </button>
+              </motion.div>
+            ))}
+          </motion.div>
+        )}
+      </AnimatePresence>
+
       {/* MATRIX AND GRID CARRIER */}
-      {activeTab === 'engines' ? (
-        <div className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
+      <AnimatePresence mode="wait">
+        {activeTab === 'engines' ? (
+          <motion.div key="engines" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="grid grid-cols-1 lg:grid-cols-12 gap-6 items-start">
           
           {/* SIDEBAR SELECTOR (Left, 4 columns) */}
           <div className="col-span-12 lg:col-span-4 space-y-2.5">
             <div className="p-4 bg-[#090b11] border border-slate-800/60 rounded-2.5xl">
               <header className="flex items-center justify-between mb-1">
-                <span className="text-[9px] font-bold text-violet-400 tracking-widest font-mono uppercase block">
+                <span className="text-[9px] font-bold text-zinc-300 tracking-widest font-mono uppercase block">
                   CHOOSE REPOSITORY SYSTEM
                 </span>
-                <span className="text-[8px] bg-[#10b981]/15 text-[#10b981] font-bold font-mono px-1.5 py-0.5 rounded-full border border-emerald-500/20">
+                <span className="text-[8px] bg-[#d4d4d8]/15 text-[#d4d4d8] font-bold font-mono px-1.5 py-0.5 rounded-full border border-white/10">
                   20 IN-INDEX
                 </span>
               </header>
@@ -569,12 +644,12 @@ export default function SupremeOSControlPanel({
                     }}
                     className={`p-3 rounded-2xl border transition-all cursor-pointer flex items-start gap-3 ${
                       isSelected
-                        ? 'bg-violet-950/20 border-violet-500/35 shadow-md shadow-violet-500/5'
+                        ? 'bg-white/5 border-white/10 shadow-md shadow-black/50'
                         : 'bg-[#090b10]/90 border-slate-900 text-slate-400 hover:text-slate-100 hover:border-slate-800'
                     }`}
                   >
                     <div className={`p-2 rounded-xl border shrink-0 transition ${
-                      isSelected ? 'bg-violet-500/10 border-violet-400/20 text-violet-400' : 'bg-slate-950 border-slate-850 text-slate-500'
+                      isSelected ? 'bg-zinc-800 border-white/10 text-zinc-300' : 'bg-slate-950 border-slate-850 text-slate-500'
                     }`}>
                       <ActiveIcon className="w-4 h-4 animate-pulse" />
                     </div>
@@ -584,7 +659,7 @@ export default function SupremeOSControlPanel({
                           0{inv.id}. {inv.name}
                         </span>
                         <span className={`text-[8px] font-mono font-bold leading-none px-1.5 py-0.5 rounded-full border shrink-0 ${
-                          isSelected ? 'bg-indigo-950/40 border-indigo-900/40 text-indigo-300' : 'bg-slate-900 border-slate-850 text-slate-500'
+                          isSelected ? 'bg-white/5 border-white/5 text-zinc-200' : 'bg-slate-900 border-slate-850 text-slate-500'
                         }`}>
                           {inv.badge}
                         </span>
@@ -606,11 +681,11 @@ export default function SupremeOSControlPanel({
             {/* ACTIVE INGREDIENT INDICATOR */}
             <div className="relative flex flex-col md:flex-row md:items-center justify-between border-b border-slate-850 pb-4 mb-6 gap-4 select-none">
               <div className="flex items-center gap-3">
-                <div className="p-2.5 rounded-2xl bg-violet-650/15 border border-violet-500/20 text-[#c084fc]">
+                <div className="p-2.5 rounded-2xl bg-violet-650/15 border border-white/10 text-[#c084fc]">
                   {React.createElement(innovations[activeInnovation].icon, { className: 'w-5 h-5 ' + innovations[activeInnovation].accent })}
                 </div>
                 <div>
-                  <span className="text-[9.5px] font-bold text-violet-400 tracking-widest font-mono uppercase block">
+                  <span className="text-[9.5px] font-bold text-zinc-300 tracking-widest font-mono uppercase block">
                     MODULE ENGINE {innovations[activeInnovation].id} OF 20 — COGNITIVE LABS
                   </span>
                   <h2 className="text-base font-bold text-white tracking-tight">
@@ -620,7 +695,7 @@ export default function SupremeOSControlPanel({
               </div>
               
               <div className="flex items-center gap-2">
-                <span className="w-2.5 h-2.5 bg-emerald-500 rounded-full animate-ping" />
+                <span className="w-2.5 h-2.5 bg-zinc-800 rounded-full animate-ping" />
                 <span className="text-[10px] text-slate-450 font-mono font-semibold">SIGNAL COHERENT</span>
               </div>
             </div>
@@ -638,10 +713,10 @@ export default function SupremeOSControlPanel({
                   <div className="relative bg-[#050508] border border-slate-900 rounded-3xl h-64 flex items-center justify-center overflow-hidden p-6">
                     <div className="absolute inset-0 bg-cover bg-grid-pattern opacity-10"></div>
                     
-                    <div className="absolute border border-dashed border-violet-500/10 rounded-full w-56 h-56 animate-spin-slow pointer-events-none" />
-                    <div className="absolute border border-dashed border-emerald-500/5 rounded-full w-40 h-40 [animation-duration:12s] animate-spin-slow pointer-events-none" />
+                    <div className="absolute border border-dashed border-white/10 rounded-full w-56 h-56 animate-spin-slow pointer-events-none" />
+                    <div className="absolute border border-dashed border-white/10 rounded-full w-40 h-40 [animation-duration:12s] animate-spin-slow pointer-events-none" />
 
-                    <div className="absolute bg-[#0b0d14]/90 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-mono bottom-3 left-3 text-slate-400 shadow-xl pointer-events-none">
+                    <div className="absolute bg-[#09090b]/90 border border-slate-800 rounded-xl px-3 py-1.5 text-[10px] font-mono bottom-3 left-3 text-slate-400 shadow-xl pointer-events-none">
                       Hover Node to pull AST specs delta...
                     </div>
 
@@ -660,9 +735,9 @@ export default function SupremeOSControlPanel({
                           archHoveredNode === 'api-gateway' ? 'border-[#818cf8] text-white shadow-lg' : 'border-slate-850 text-slate-400'
                         }`}
                       >
-                        <Layers className="w-3.5 h-3.5 mx-auto mb-1 text-indigo-400 animate-pulse" />
+                        <Layers className="w-3.5 h-3.5 mx-auto mb-1 text-zinc-300 animate-pulse" />
                         <span className="text-[9px] font-mono uppercase tracking-wide block">ApiGateway</span>
-                        <span className="text-[8px] text-indigo-400 font-bold">Port 3000</span>
+                        <span className="text-[8px] text-zinc-300 font-bold">Port 3000</span>
                       </div>
 
                       <div 
@@ -670,12 +745,12 @@ export default function SupremeOSControlPanel({
                         onMouseLeave={() => setArchHoveredNode(null)}
                         onClick={() => { playClick(1.5); showToast("Cognitive brain engine active", "success"); }}
                         className={`absolute left-[45%] top-[30%] px-5 py-3 hover:scale-110 active:scale-95 transition bg-[#090b14]/95 border rounded-3xl cursor-pointer select-none ${
-                          archHoveredNode === 'brain' ? 'border-violet-500 text-white shadow-xl' : 'border-violet-900/50 text-violet-300'
+                          archHoveredNode === 'brain' ? 'border-white/10 text-white shadow-xl' : 'border-white/5 text-zinc-200'
                         }`}
                       >
-                        <Cpu className="w-5 h-5 mx-auto mb-1.5 text-violet-300 animate-spin-slow" />
+                        <Cpu className="w-5 h-5 mx-auto mb-1.5 text-zinc-200 animate-spin-slow" />
                         <span className="text-[10px] font-black tracking-widest block font-mono">COGNITIVE.OS</span>
-                        <span className="text-[8px] text-emerald-400 block font-mono">AST Coherent</span>
+                        <span className="text-[8px] text-zinc-300 block font-mono">AST Coherent</span>
                       </div>
 
                       <div 
@@ -683,12 +758,12 @@ export default function SupremeOSControlPanel({
                         onMouseLeave={() => setArchHoveredNode(null)}
                         onClick={() => { playClick(1.1); showToast("Local SQLite Connection Pool selected", "info"); }}
                         className={`absolute right-[12%] top-[15%] px-3.5 py-2 hover:scale-105 active:scale-95 transition bg-slate-950/90 border rounded-2xl cursor-pointer select-none ${
-                          archHoveredNode === 'db' ? 'border-emerald-400 text-white shadow-lg' : 'border-slate-850 text-slate-400'
+                          archHoveredNode === 'db' ? 'border-white/10 text-white shadow-lg' : 'border-slate-850 text-slate-400'
                         }`}
                       >
-                        <Compass className="w-3.5 h-3.5 mx-auto mb-1 text-emerald-400" />
+                        <Compass className="w-3.5 h-3.5 mx-auto mb-1 text-zinc-300" />
                         <span className="text-[9px] font-mono uppercase tracking-wide block">WorkspaceDB</span>
-                        <span className="text-[8px] text-emerald-400 block">sqlite (11ms)</span>
+                        <span className="text-[8px] text-zinc-300 block">sqlite (11ms)</span>
                       </div>
 
                       <div 
@@ -707,12 +782,12 @@ export default function SupremeOSControlPanel({
 
                   <div className="bg-[#0b0c13] border border-slate-900 rounded-2.5xl p-4 flex items-center justify-between">
                     <div>
-                      <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-violet-400 block">Universe Force Simulation</span>
+                      <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-zinc-300 block">Universe Force Simulation</span>
                       <span className="text-xs text-slate-450 mt-1 block">Toggle dynamic connection gravity index to test repository balance scores.</span>
                     </div>
                     <button
                       onClick={() => { setArchPulseOn(!archPulseOn); playClick(1.2); showToast("Simulation vectors aligned!", "info"); }}
-                      className="px-4 py-2 bg-indigo-650 hover:bg-indigo-600 active:scale-95 text-white font-mono font-bold rounded-xl text-xs transition cursor-pointer"
+                      className="px-4 py-2 bg-indigo-650 hover:bg-zinc-800 active:scale-95 text-white font-mono font-bold rounded-xl text-xs transition cursor-pointer"
                     >
                       {archPulseOn ? "GRAVITY: DENSE" : "GRAVITY: REBALANCED"}
                     </button>
@@ -730,7 +805,7 @@ export default function SupremeOSControlPanel({
                   <div className="bg-[#06060c] border border-slate-900 rounded-3xl p-5 shadow-inner">
                     <div className="flex items-center justify-between mb-4">
                       <div>
-                        <span className="text-[10px] text-emerald-400 font-mono font-bold block uppercase">Checkpoint Selected</span>
+                        <span className="text-[10px] text-zinc-300 font-mono font-bold block uppercase">Checkpoint Selected</span>
                         <span className="text-sm font-bold text-white block">{timelineMilestones[timelineIndex].title}</span>
                       </div>
                       <div className="flex items-center gap-2">
@@ -739,7 +814,7 @@ export default function SupremeOSControlPanel({
                           className="p-2.5 bg-slate-900 hover:bg-slate-800 text-white rounded-xl border border-slate-800 active:scale-95 transition cursor-pointer"
                           title={isTimePlaying ? "Pause autoplay" : "Autoplay timeline transition"}
                         >
-                          <Play className={`w-4 h-4 ${isTimePlaying ? 'text-emerald-400 animate-spin-slow' : 'text-slate-450'}`} />
+                          <Play className={`w-4 h-4 ${isTimePlaying ? 'text-zinc-300 animate-spin-slow' : 'text-slate-450'}`} />
                         </button>
                         <button
                           onClick={() => { setTimelineIndex(0); playClick(0.9); }}
@@ -764,7 +839,7 @@ export default function SupremeOSControlPanel({
                           >
                             <div className={`w-5 h-5 rounded-full flex items-center justify-center transition-all border duration-353 ${
                               isActive 
-                                ? 'bg-[#10b981] border-[#10b981] scale-125 shadow-lg shadow-[#10b981]/25' 
+                                ? 'bg-[#d4d4d8] border-[#d4d4d8] scale-125 shadow-lg shadow-[#d4d4d8]/25' 
                                 : 'bg-[#10121a] border-slate-700 hover:border-slate-400 hover:scale-110'
                             }`}>
                               <span className={`w-1.5 h-1.5 rounded-full ${isActive ? 'bg-white' : 'bg-slate-500'}`} />
@@ -780,7 +855,7 @@ export default function SupremeOSControlPanel({
 
                   <div className="bg-[#0b0c13] border border-slate-900 rounded-2.5xl p-5">
                     <header className="flex items-center justify-between text-[10px] font-mono text-slate-400 border-b border-slate-850 pb-2 mb-3">
-                      <span>ALIGNMENT DRIFT: <strong className="text-[#10b981] font-bold">{timelineMilestones[timelineIndex].drift}</strong></span>
+                      <span>ALIGNMENT DRIFT: <strong className="text-[#d4d4d8] font-bold">{timelineMilestones[timelineIndex].drift}</strong></span>
                       <span>COMMITTER: creator_agent_pro</span>
                     </header>
                     <p className="text-xs text-slate-350 leading-relaxed font-sans">
@@ -803,7 +878,7 @@ export default function SupremeOSControlPanel({
                       value={memorySearch}
                       onChange={(e) => setMemorySearch(e.target.value)}
                       placeholder="Search semantic database memories (e.g. CORS, WS, websocket)..."
-                      className="bg-[#050508] border border-slate-850 text-xs rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-violet-500 w-full font-mono transition"
+                      className="bg-[#050508] border border-slate-850 text-xs rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-white/10 w-full font-mono transition"
                     />
                     <button
                       onClick={() => { setMemorySearch(""); playClick(0.9); }}
@@ -817,13 +892,13 @@ export default function SupremeOSControlPanel({
                     {simulatedMemories
                       .filter(m => m.q.toLowerCase().includes(memorySearch.toLowerCase()) || m.ans.toLowerCase().includes(memorySearch.toLowerCase()))
                       .map((item, id) => (
-                        <div key={id} className="bg-[#06060c] border border-slate-900 rounded-2.5xl p-4 hover:border-violet-500/15 transition">
+                        <div key={id} className="bg-[#06060c] border border-slate-900 rounded-2.5xl p-4 hover:border-white/10 transition">
                           <div className="flex items-center justify-between mb-1.5 font-mono">
                             <span className="text-xs font-bold text-white flex items-center gap-1.5">
-                              <BookOpen className="w-3.5 h-3.5 text-violet-400" />
+                              <BookOpen className="w-3.5 h-3.5 text-zinc-300" />
                               {item.q}
                             </span>
-                            <span className="text-[9px] font-bold text-violet-400 bg-violet-950/40 border border-violet-900/30 px-2.5 py-0.5 rounded-full uppercase">
+                            <span className="text-[9px] font-bold text-zinc-300 bg-white/5 border border-white/5 px-2.5 py-0.5 rounded-full uppercase">
                               {item.cat}
                             </span>
                           </div>
@@ -946,7 +1021,7 @@ export default function SupremeOSControlPanel({
 
                   <div className="bg-[#050508] border border-slate-905 rounded-3xl p-5 shadow-inner">
                     <div className="flex flex-col gap-3.5">
-                      <label className="text-[9px] uppercase font-mono tracking-widest font-black text-indigo-400 select-none">
+                      <label className="text-[9px] uppercase font-mono tracking-widest font-black text-zinc-300 select-none">
                         Cortex Target Concept Specifier
                       </label>
                       <div className="flex gap-2">
@@ -955,12 +1030,12 @@ export default function SupremeOSControlPanel({
                           value={visionInput}
                           onChange={(e) => setVisionInput(e.target.value)}
                           placeholder="What would you like to build?..."
-                          className="bg-slate-950 border border-slate-900 text-xs rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-indigo-400 w-full font-sans transition"
+                          className="bg-slate-950 border border-slate-900 text-xs rounded-2xl px-4 py-3 text-white focus:outline-none focus:border-white/10 w-full font-sans transition"
                         />
                         <button
                           onClick={runVisionToCode}
                           disabled={isSynthesizing}
-                          className="px-5 py-2.5 bg-indigo-650 hover:bg-indigo-600 text-xs font-mono font-bold text-white rounded-2xl active:scale-95 transition cursor-pointer shrink-0"
+                          className="px-5 py-2.5 bg-indigo-650 hover:bg-zinc-800 text-xs font-mono font-bold text-white rounded-2xl active:scale-95 transition cursor-pointer shrink-0"
                         >
                           {isSynthesizing ? 'FORGING...' : 'GENERATE SPECS'}
                         </button>
@@ -968,10 +1043,10 @@ export default function SupremeOSControlPanel({
                     </div>
 
                     {synthesizedResult && (
-                      <div className="bg-[#0a0a14] border border-indigo-500/15 rounded-2.5xl p-4.5 mt-4 text-xs animate-fade-in select-text">
-                        <header className="flex items-center justify-between border-b border-indigo-500/10 pb-2 mb-3">
-                          <strong className="text-indigo-300 font-bold uppercase tracking-wide">Forced Architecture Specifications</strong>
-                          <span className="text-[9px] bg-indigo-950 text-indigo-300 font-mono px-2.5 py-0.5 rounded-full border border-indigo-900/30 font-bold">
+                      <div className="bg-[#0a0a14] border border-white/10 rounded-2.5xl p-4.5 mt-4 text-xs animate-fade-in select-text">
+                        <header className="flex items-center justify-between border-b border-white/10 pb-2 mb-3">
+                          <strong className="text-zinc-200 font-bold uppercase tracking-wide">Forced Architecture Specifications</strong>
+                          <span className="text-[9px] bg-white/5 text-zinc-200 font-mono px-2.5 py-0.5 rounded-full border border-white/5 font-bold">
                             {synthesizedResult.estimatedMaturity}
                           </span>
                         </header>
@@ -984,7 +1059,7 @@ export default function SupremeOSControlPanel({
                             </div>
                             <div>
                               <span className="text-slate-450 block">Complexity Score:</span>
-                              <span className="text-emerald-400 font-bold">98% Perfect fit</span>
+                              <span className="text-zinc-300 font-bold">98% Perfect fit</span>
                             </div>
                           </div>
                           <div>
@@ -1016,36 +1091,36 @@ export default function SupremeOSControlPanel({
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4 animate-fade-in">
                     <div className="bg-[#050508] border border-slate-900 rounded-3xl p-5 flex flex-col justify-between">
                       <div>
-                        <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-teal-400 block">Preflight Checks Status</span>
+                        <span className="text-[10px] uppercase font-mono tracking-wider font-bold text-zinc-300 block">Preflight Checks Status</span>
                         <div className="mt-3.5 space-y-2 px-1">
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-400 flex items-center gap-1.5">
-                              <Radio className="w-3.5 h-3.5 text-teal-400" /> Host & Port 3000 Ingress Bound
+                              <Radio className="w-3.5 h-3.5 text-zinc-300" /> Host & Port 3000 Ingress Bound
                             </span>
-                            <span className="text-emerald-400 font-mono font-bold">PASS</span>
+                            <span className="text-zinc-300 font-mono font-bold">PASS</span>
                           </div>
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-400 flex items-center gap-1.5">
-                              <Radio className="w-3.5 h-3.5 text-teal-400" /> Env Example Registry Check
+                              <Radio className="w-3.5 h-3.5 text-zinc-300" /> Env Example Registry Check
                             </span>
-                            <span className="text-emerald-400 font-mono font-bold">PASS</span>
+                            <span className="text-zinc-300 font-mono font-bold">PASS</span>
                           </div>
                           <div className="flex items-center justify-between text-xs">
                             <span className="text-slate-400 flex items-center gap-1.5">
                               <Radio className="w-3.5 h-3.5 text-rose-400" /> Private Keys exposed in Git AST
                             </span>
-                            <span className="text-emerald-400 font-mono font-bold">0 DETECTED</span>
+                            <span className="text-zinc-300 font-mono font-bold">0 DETECTED</span>
                           </div>
                         </div>
                       </div>
 
-                      <div className="border-t border-slate-900 pt-3 text-[10px] text-slate-450 font-mono uppercase font-bold text-teal-400">
+                      <div className="border-t border-slate-900 pt-3 text-[10px] text-slate-450 font-mono uppercase font-bold text-zinc-300">
                         Target platform: Cloud Run Container
                       </div>
                     </div>
 
                     <div className="bg-[#05050c] border border-slate-900 rounded-3xl p-5 flex flex-col items-center justify-center text-center">
-                      <span className="text-[10px] text-teal-400 font-mono font-bold uppercase tracking-widest block mb-1">DEPLOY CONTINUOUS CONFIDENCE</span>
+                      <span className="text-[10px] text-zinc-300 font-mono font-bold uppercase tracking-widest block mb-1">DEPLOY CONTINUOUS CONFIDENCE</span>
                       <span className="text-4xl font-black text-white font-sans">
                         {deployConfidence}%
                       </span>
@@ -1055,7 +1130,7 @@ export default function SupremeOSControlPanel({
 
                       <button
                         onClick={() => { playClick(1.4); showToast("Docker bundle verified successfully!", "success"); }}
-                        className="px-4 py-2 mt-4 bg-teal-600 hover:bg-teal-500 active:scale-95 text-white rounded-xl text-xs font-semibold font-mono transition cursor-pointer"
+                        className="px-4 py-2 mt-4 bg-zinc-800 hover:bg-zinc-800 active:scale-95 text-white rounded-xl text-xs font-semibold font-mono transition cursor-pointer"
                       >
                         RUN MANIFEST VERIFICATION
                       </button>
@@ -1140,7 +1215,7 @@ export default function SupremeOSControlPanel({
                       >
                         <div className="flex items-center gap-3">
                           <div className={`p-2 rounded-xl shrink-0 ${
-                            vul.status === 'repaired' ? 'bg-emerald-950/40 text-emerald-400 border border-emerald-900/30' : 'bg-rose-950/40 text-rose-450 border border-rose-900/30 animate-pulse'
+                            vul.status === 'repaired' ? 'bg-white/5 text-zinc-300 border border-white/5' : 'bg-rose-950/40 text-rose-450 border border-rose-900/30 animate-pulse'
                           }`}>
                             <ShieldAlert className="w-4 h-4" />
                           </div>
@@ -1152,7 +1227,7 @@ export default function SupremeOSControlPanel({
 
                         <span className={`text-[9.5px] font-mono font-bold px-2.5 py-1 rounded-full uppercase border ${
                           vul.status === 'repaired'
-                            ? 'bg-emerald-950 text-emerald-400 border-emerald-900/40'
+                            ? 'bg-white/5 text-zinc-300 border-white/5'
                             : 'bg-rose-950/20 text-rose-450 border-rose-500/20 animate-pulse'
                         }`}>
                           {vul.status === 'repaired' ? 'SECURED AST' : 'AUDIT FAIL'}
@@ -1175,10 +1250,10 @@ export default function SupremeOSControlPanel({
                       <div key={key}>
                         <div className="flex items-center justify-between text-xs font-bold font-sans">
                           <span className="text-slate-300 capitalize">{key.replace(/([A-Z])/g, ' $1')} Index Rating</span>
-                          <span className="text-violet-400 font-mono">{value}%</span>
+                          <span className="text-zinc-300 font-mono">{value}%</span>
                         </div>
                         <div className="bg-slate-950 h-2 rounded-full mt-1.5 overflow-hidden border border-slate-900">
-                          <div className="bg-gradient-to-r from-violet-600 to-[#10b981] h-full rounded-full transition-all duration-300" style={{ width: `${value}%` }} />
+                          <div className="bg-gradient-to-r from-zinc-800 to-[#d4d4d8] h-full rounded-full transition-all duration-300" style={{ width: `${value}%` }} />
                         </div>
                       </div>
                     ))}
@@ -1195,7 +1270,7 @@ export default function SupremeOSControlPanel({
 
                   <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div className="bg-[#050508] border border-slate-900 rounded-3xl p-5 space-y-3">
-                      <span className="text-[10px] text-emerald-400 font-mono font-bold block uppercase">Select Test Root Endpoints</span>
+                      <span className="text-[10px] text-zinc-300 font-mono font-bold block uppercase">Select Test Root Endpoints</span>
                       
                       <select 
                         value={selectedApiEndpoint}
@@ -1222,15 +1297,15 @@ export default function SupremeOSControlPanel({
                       <button
                         onClick={executeApiTelemetryTest}
                         disabled={testingEndpoint}
-                        className="w-full py-2 bg-emerald-650 hover:bg-emerald-600 text-white font-mono font-bold text-xs rounded-xl active:scale-95 transition cursor-pointer"
+                        className="w-full py-2 bg-violet-650 hover:bg-zinc-800 text-white font-mono font-bold text-xs rounded-xl active:scale-95 transition cursor-pointer"
                       >
                         {testingEndpoint ? "PROBING PIPELINE..." : "TEST PATH INGRESS"}
                       </button>
                     </div>
 
                     <div className="bg-[#05050c] border border-slate-900 rounded-3xl p-5 flex flex-col justify-between">
-                      <span className="text-[10px] text-[#10b981] font-mono font-bold uppercase block">Ingress Response Payload Logs</span>
-                      <div className="bg-black/60 rounded-xl p-3 h-28 overflow-y-auto font-mono text-[10px] text-[#10b981] space-y-1 scrollbar-thin">
+                      <span className="text-[10px] text-[#d4d4d8] font-mono font-bold uppercase block">Ingress Response Payload Logs</span>
+                      <div className="bg-black/60 rounded-xl p-3 h-28 overflow-y-auto font-mono text-[10px] text-[#d4d4d8] space-y-1 scrollbar-thin">
                         {apiMatrixLogs.map((log, idx) => (
                           <div key={idx} className="truncate">{log}</div>
                         ))}
@@ -1250,12 +1325,12 @@ export default function SupremeOSControlPanel({
                   <div className="bg-[#050508] border border-slate-900 rounded-3xl p-5">
                     <div className="flex flex-col md:flex-row md:items-center justify-between border-b border-slate-850 pb-3 mb-4 gap-2">
                       <div>
-                        <span className="text-[10px] text-indigo-400 font-mono font-bold block">SCHEMA COALITION PATTERNS</span>
+                        <span className="text-[10px] text-zinc-300 font-mono font-bold block">SCHEMA COALITION PATTERNS</span>
                         <span className="text-xs text-slate-400">Database Engine type: <strong className="text-white">SQLite / SQLite3</strong></span>
                       </div>
                       
                       <div className="flex items-center gap-2">
-                        <span className={`w-2.5 h-2.5 rounded-full ${dbDriftStatus === 'aligned' ? 'bg-emerald-500' : 'bg-amber-500 animate-pulse'}`} />
+                        <span className={`w-2.5 h-2.5 rounded-full ${dbDriftStatus === 'aligned' ? 'bg-zinc-800' : 'bg-amber-500 animate-pulse'}`} />
                         <span className="text-[11px] font-mono uppercase font-bold text-white">
                           Schema: {dbDriftStatus.toUpperCase()}
                         </span>
@@ -1264,19 +1339,19 @@ export default function SupremeOSControlPanel({
 
                     <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
                       <div className="space-y-2">
-                        <span className="text-[10px] font-mono text-indigo-405 block font-bold text-indigo-400 uppercase">Interactive Migrations Checklist</span>
+                        <span className="text-[10px] font-mono text-indigo-405 block font-bold text-zinc-300 uppercase">Interactive Migrations Checklist</span>
                         <div className="bg-slate-950/80 p-3 rounded-xl border border-slate-900 space-y-1.5 text-[11px] font-mono">
                           <div className="flex justify-between text-slate-400">
                             <span>m01_schema_init</span>
-                            <span className="text-emerald-400">APPLIED</span>
+                            <span className="text-zinc-300">APPLIED</span>
                           </div>
                           <div className="flex justify-between text-slate-405 text-slate-400">
                             <span>m02_oauth_credentials</span>
-                            <span className="text-emerald-400">APPLIED</span>
+                            <span className="text-zinc-300">APPLIED</span>
                           </div>
                           <div className="flex justify-between text-slate-400">
                             <span>m03_alignment_drift</span>
-                            <span className={dbDriftStatus === 'aligned' ? 'text-emerald-400' : 'text-amber-500 font-bold animate-pulse'}>
+                            <span className={dbDriftStatus === 'aligned' ? 'text-zinc-300' : 'text-amber-500 font-bold animate-pulse'}>
                               {dbDriftStatus === 'aligned' ? 'APPLIED' : 'DRIFTED'}
                             </span>
                           </div>
@@ -1285,7 +1360,7 @@ export default function SupremeOSControlPanel({
                         <button
                           onClick={auditDatabaseDrift}
                           disabled={isCheckingDb}
-                          className="w-full py-2 bg-indigo-650 hover:bg-indigo-600 text-white font-mono text-xs rounded-xl active:scale-95 transition cursor-pointer font-bold"
+                          className="w-full py-2 bg-indigo-650 hover:bg-zinc-800 text-white font-mono text-xs rounded-xl active:scale-95 transition cursor-pointer font-bold"
                         >
                           {isCheckingDb ? "VERIFYING INDEX DRIFT..." : "COMMENCE ALIGNMENT DRIFT PATCHAR"}
                         </button>
@@ -1318,7 +1393,7 @@ export default function SupremeOSControlPanel({
                     <div className="bg-[#050510] border border-slate-900 rounded-3xl p-5 text-center">
                       <span className="text-[9px] font-mono text-amber-400 font-bold block uppercase mb-1">Retry Loop Storm Factor</span>
                       <span className="text-3xl font-black text-rose-500 font-sans">0</span>
-                      <span className="text-[10px] text-[#10b981] block mt-1 font-bold">NOMINAL SPEED</span>
+                      <span className="text-[10px] text-[#d4d4d8] block mt-1 font-bold">NOMINAL SPEED</span>
                     </div>
 
                     <div className="bg-[#050510] border border-slate-900 rounded-3xl p-5 flex flex-col justify-center">
@@ -1348,7 +1423,7 @@ export default function SupremeOSControlPanel({
                     </div>
 
                     <div className="w-full bg-[#10121a] h-2 rounded-full overflow-hidden border border-slate-850">
-                      <div className="bg-gradient-to-r from-red-500 via-amber-400 to-emerald-400 h-full rounded-full transition-all duration-700" style={{ width: `${securityScore}%` }} />
+                      <div className="bg-gradient-to-r from-red-500 via-amber-400 to-violet-400 h-full rounded-full transition-all duration-700" style={{ width: `${securityScore}%` }} />
                     </div>
 
                     <button
@@ -1369,7 +1444,7 @@ export default function SupremeOSControlPanel({
                   </p>
 
                   <div className="bg-black/60 border border-slate-900 rounded-3xl p-5">
-                    <span className="text-[10px] text-teal-400 font-mono font-bold block uppercase mb-3 text-center">TAP HOTSPOT TO INSPECT PROPAGATION LAGS</span>
+                    <span className="text-[10px] text-zinc-300 font-mono font-bold block uppercase mb-3 text-center">TAP HOTSPOT TO INSPECT PROPAGATION LAGS</span>
                     
                     <div className="grid grid-cols-2 md:grid-cols-4 gap-3">
                       {[
@@ -1382,18 +1457,18 @@ export default function SupremeOSControlPanel({
                           key={i} 
                           onClick={() => { setSelectedHotspot(hs.name); playClick(1.0 + i * 0.1); }}
                           className={`p-3 rounded-2xl border cursor-pointer transition select-none text-center ${
-                            selectedHotspot === hs.name ? 'bg-teal-950/20 border-teal-500/40 text-teal-400 scale-105' : 'bg-slate-950/45 border-slate-900 text-slate-400 hover:border-slate-800'
+                            selectedHotspot === hs.name ? 'bg-white/5 border-white/10 text-zinc-300 scale-105' : 'bg-slate-950/45 border-slate-900 text-slate-400 hover:border-slate-800'
                           }`}
                         >
                           <span className="text-[11px] font-bold block text-white">{hs.name}</span>
-                          <span className="text-[10px] font-mono text-teal-400 block mt-1">{hs.delay}</span>
+                          <span className="text-[10px] font-mono text-zinc-300 block mt-1">{hs.delay}</span>
                           <span className="text-[9px] text-slate-500 block uppercase font-mono">{hs.status}</span>
                         </div>
                       ))}
                     </div>
 
                     {selectedHotspot && (
-                      <div className="bg-[#050508] p-3 rounded-xl border border-teal-950/50 mt-4 text-xs font-sans text-center text-teal-300 animate-fade-in">
+                      <div className="bg-[#050508] p-3 rounded-xl border border-blue-950/50 mt-4 text-xs font-sans text-center text-zinc-200 animate-fade-in">
                         🏁 <strong>Hotspot: {selectedHotspot}</strong> - System thread capacity nominal. Outage risks low. All hooks fully stable.
                       </div>
                     )}
@@ -1435,15 +1510,15 @@ export default function SupremeOSControlPanel({
                   </p>
 
                   <div className="bg-[#050510] border border-slate-900 rounded-3xl p-5 space-y-3.5">
-                    <span className="text-[10.5px] text-indigo-400 font-mono font-bold block uppercase">Historical Software Architecture Decider Logs</span>
+                    <span className="text-[10.5px] text-zinc-300 font-mono font-bold block uppercase">Historical Software Architecture Decider Logs</span>
                     
                     <div className="space-y-2.5 text-xs text-slate-350">
-                      <div className="border-l-2 border-indigo-500 pl-3.5">
+                      <div className="border-l-2 border-white/10 pl-3.5">
                         <span className="font-bold text-white block">Decider 01: Client vs Server architecture fallback parameters</span>
                         <p className="mt-1 leading-relaxed text-[11px]">Choose server-side fallback endpoints inside Express to proxy API keys. Avoid exposing credentials directly to public client routers.</p>
                       </div>
                       
-                      <div className="border-l-2 border-indigo-500 pl-3.5">
+                      <div className="border-l-2 border-white/10 pl-3.5">
                         <span className="font-bold text-white block">Decider 02: Bundle formats optimization payload</span>
                         <p className="mt-1 leading-relaxed text-[11px]">Compile whole server entrypoints into dist/server.cjs using esbuild external strategies. Keeps build output self-sufficient.</p>
                       </div>
@@ -1460,12 +1535,12 @@ export default function SupremeOSControlPanel({
                   </p>
 
                   <div className="bg-[#050508] border border-slate-900 rounded-3xl p-5 text-center space-y-4">
-                    <span className="text-[10px] text-violet-400 font-mono font-bold block uppercase">AI Code Scoreboard Engine</span>
+                    <span className="text-[10px] text-zinc-300 font-mono font-bold block uppercase">AI Code Scoreboard Engine</span>
                     
                     {reviewScore ? (
                       <div className="animate-fade-in space-y-2">
                         <span className="text-4xl font-extrabold text-white font-mono">{reviewScore}%</span>
-                        <span className="text-xs text-emerald-400 block font-semibold">✓ PRISTINE QUALITY ASSURANCE RATING</span>
+                        <span className="text-xs text-zinc-300 block font-semibold">✓ PRISTINE QUALITY ASSURANCE RATING</span>
                         <p className="text-[11px] text-slate-450 max-w-sm mx-auto">Imports are clean, files separated properly, no trailing wildcard exports, no exposed secrets.</p>
                       </div>
                     ) : (
@@ -1477,7 +1552,7 @@ export default function SupremeOSControlPanel({
                     <button
                       onClick={triggerReviewScan}
                       disabled={isReviewing}
-                      className="px-6 py-2.5 bg-violet-600 hover:bg-violet-500 text-white font-mono text-xs rounded-xl active:scale-95 transition cursor-pointer"
+                      className="px-6 py-2.5 bg-zinc-800 hover:bg-zinc-800 text-white font-mono text-xs rounded-xl active:scale-95 transition cursor-pointer"
                     >
                       {isReviewing ? "SCANNING ABSTRACT SYNTAX..." : "BOOT AI CODE REVIEW EVALUATION"}
                     </button>
@@ -1544,7 +1619,7 @@ export default function SupremeOSControlPanel({
                       {activeUsers.map((usr, i) => (
                         <div key={i} className="flex items-center justify-between text-xs p-2 hover:bg-slate-900/40 rounded-xl">
                           <div className="flex items-center gap-2">
-                            <span className="w-2 h-2 bg-emerald-500 rounded-full" />
+                            <span className="w-2 h-2 bg-zinc-800 rounded-full" />
                             <span className="font-mono text-white">{usr.email}</span>
                           </div>
                           <span className="text-[10px] text-slate-450 uppercase">{usr.role}</span>
@@ -1559,176 +1634,22 @@ export default function SupremeOSControlPanel({
 
           </div>
 
-        </div>
-      ) : (
-        /* REVENUE-DRIVING FEATURE GROUPS AND LICENSE BOOKING */
-        <div className="animate-fade-in space-y-8 select-text text-slate-300">
-          
-          {/* PARENT TIER DEFINITIONS BANNER */}
-          <div className="grid grid-cols-1 md:grid-cols-4 gap-4 select-none">
-            
-            {/* TIER 1 */}
-            <div 
-              onClick={() => { setLicensePlan('free'); playClick(1.0); }}
-              className={`p-5 rounded-2.5xl cursor-pointer border transition ${
-                licensePlan === 'free' ? 'bg-slate-950 border-slate-600 ring-2 ring-violet-500/20' : 'bg-black/30 border-slate-900 hover:border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-slate-400 font-bold block">ENTRY TIER</span>
-                <span className="text-[9px] bg-slate-800 px-2 py-0.5 rounded-full text-slate-300">FREE</span>
-              </div>
-              <h2 className="text-lg font-black text-white">Entry Basic</h2>
-              <span className="text-[10px] text-slate-400 block mt-1">For single builders scanning syntax.</span>
-              
-              <ul className="text-[10.5px] text-slate-450 mt-4 space-y-1.5 block">
-                <li>✓ Local Files AST Scanning</li>
-                <li>✓ Basic Roadmap Alignment Score</li>
-                <li>✓ Core Workspace Diagnostics</li>
-                <li>✓ Static Dependency Map</li>
-              </ul>
+        </motion.div>
+      ) : activeTab === 'pricing' ? (
+        <motion.div key="pricing" layout initial={{ opacity: 0 }} animate={{ opacity: 1 }} exit={{ opacity: 0 }} transition={{ duration: 0.2 }} className="space-y-6">
+          <div className="bg-[#090b11]/90 border border-slate-800 rounded-3xl p-8 flex flex-col items-center justify-center min-h-[400px] shadow-2xl">
+            <DollarSign className="w-12 h-12 text-violet-400 mb-4 animate-pulse" />
+            <h2 className="text-2xl font-bold font-sans text-white mb-2 tracking-tight">Enterprise License Engine</h2>
+            <p className="text-sm text-slate-400 mb-6 font-medium text-center max-w-md">Activate your organization's custom scaling tier. Gain unbounded access to cognitive memory engines and telemetry pipelines.</p>
+            <div className="flex items-center gap-3">
+              <input type="text" placeholder="Promo Code" className="bg-[#05060b] border border-slate-800 px-4 py-2 rounded-xl text-sm text-white font-mono" />
+              <button className="bg-indigo-600 hover:bg-indigo-500 text-white font-bold py-2 px-6 rounded-xl transition duration-150">Apply</button>
             </div>
-
-            {/* TIER 2 */}
-            <div 
-              onClick={() => { setLicensePlan('pro'); playClick(1.1); }}
-              className={`p-5 rounded-2.5xl cursor-pointer border transition ${
-                licensePlan === 'pro' ? 'bg-[#0f0b18]/80 border-violet-500/40 ring-2 ring-violet-500/20' : 'bg-black/30 border-slate-900 hover:border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-violet-400 font-bold block">INDIVIDUAL PRO</span>
-                <span className="text-[9px] bg-violet-950/50 border border-violet-900/30 text-violet-300 px-2.5 py-0.5 rounded-full font-bold">POPULAR</span>
-              </div>
-              <h2 className="text-lg font-black text-white">Pro Developer</h2>
-              <span className="text-[10px] text-slate-400 block mt-1">Deploys server-side proxies and AI.</span>
-              
-              <ul className="text-[10.5px] text-slate-300 mt-4 space-y-1.5 block">
-                <li>✓ Autonomous AI Integrations</li>
-                <li>✓ Deep AST Self-Heal Repair</li>
-                <li>✓ Command Palette palettize</li>
-                <li>✓ API Outages Chaos simulator</li>
-                <li>✓ Performance terrain zoning</li>
-              </ul>
-            </div>
-
-            {/* TIER 3 */}
-            <div 
-              onClick={() => { setLicensePlan('team'); playClick(1.2); }}
-              className={`p-5 rounded-2.5xl cursor-pointer border transition ${
-                licensePlan === 'team' ? 'bg-slate-950 border-slate-600 ring-2 ring-violet-500/20' : 'bg-black/30 border-slate-900 hover:border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-teal-400 font-bold block">SHARED CORE</span>
-                <span className="text-[9.5px] bg-[#1a2f2b] text-[#10b981] px-2 py-0.5 rounded-full font-bold">TEAM</span>
-              </div>
-              <h2 className="text-lg font-black text-white">Unified Team</h2>
-              <span className="text-[10px] text-slate-400 block mt-1">Secure collaboration rooms.</span>
-              
-              <ul className="text-[10.5px] text-slate-450 mt-4 space-y-1.5 block">
-                <li>✓ Scriptor Decision Vault</li>
-                <li>✓ Team Copilot Sync Room</li>
-                <li>✓ Ownership alignment radar</li>
-                <li>✓ Strategic product genome</li>
-              </ul>
-            </div>
-
-            {/* TIER 4 */}
-            <div 
-              onClick={() => { setLicensePlan('enterprise'); playClick(1.3); }}
-              className={`p-5 rounded-2.5xl cursor-pointer border transition ${
-                licensePlan === 'enterprise' ? 'bg-[#140b0d]/80 border-rose-500/40 ring-2 ring-rose-500/20' : 'bg-black/30 border-slate-900 hover:border-slate-800'
-              }`}
-            >
-              <div className="flex items-center justify-between mb-2">
-                <span className="text-[10px] font-mono text-rose-450 text-rose-400 font-bold block">ENTERPRISE SYSTEM</span>
-                <span className="text-[9px] bg-rose-950/40 text-rose-400 px-2 py-0.5 rounded-full font-bold">CUSTOM</span>
-              </div>
-              <h2 className="text-lg font-black text-white">Sovereign Enterprise</h2>
-              <span className="text-[10px] text-slate-400 block mt-1">Multi-tenant governance pools.</span>
-              
-              <ul className="text-[10.5px] text-slate-450 mt-4 space-y-1.5 block">
-                <li>✓ Continuous Compliance Sentry</li>
-                <li>✓ Policy enforcement scripts</li>
-                <li>✓ 24/7 dedicated system agents</li>
-                <li>✓ Zero limits on scanner threads</li>
-              </ul>
-            </div>
-
+            <p className="text-xs text-indigo-400 mt-4 opacity-50 font-mono">Status: Trial Mode. Max 20 cognitive nodes active.</p>
           </div>
-
-          {/* DYNAMIC SUBSCRIPTION COST ESTIMATOR */}
-          <div className="bg-[#050508] border border-slate-850 p-6 rounded-3xl grid grid-cols-1 lg:grid-cols-12 gap-6 items-center">
-            
-            <div className="col-span-12 lg:col-span-8 space-y-4">
-              <span className="text-[10px] text-violet-400 font-mono font-bold uppercase block tracking-widest">CALIBRATE YOUR SEATS SUBSCRIPTION SCALE</span>
-              
-              <div>
-                <span className="text-xs text-slate-400">Specify user seats constraints layout: <strong className="text-white">{userSeats} seats</strong></span>
-                <input 
-                  type="range"
-                  min="1"
-                  max="100"
-                  value={userSeats}
-                  onChange={(e) => { setUserSeats(Number(e.target.value)); playClick(1.0); }}
-                  className="w-full h-1.5 bg-slate-950 rounded-lg appearance-none cursor-pointer accent-violet-500 select-none mt-2"
-                />
-              </div>
-
-              <div>
-                <span className="text-xs text-slate-400 block mb-1.5">Apply Promo Code payload (Try Applying CODE: <strong>NEOTOKYO</strong>):</span>
-                <div className="flex gap-2 max-w-sm">
-                  <input 
-                    type="text" 
-                    value={promoCode} 
-                    onChange={(e) => setPromoCode(e.target.value)}
-                    placeholder="e.g. NEOTOKYO"
-                    className="bg-black border border-slate-800 text-xs px-3 py-2 rounded-xl text-white outline-none focus:border-violet-500 font-mono"
-                  />
-                  <button 
-                    onClick={applyPromoDiscount}
-                    className="px-4 py-2 bg-slate-800 hover:bg-slate-700 text-xs text-slate-300 font-mono rounded-xl cursor-pointer"
-                  >
-                    VALIDATE
-                  </button>
-                </div>
-                {promoFeedback && (
-                  <span className="text-[11px] font-mono text-emerald-400 block mt-2">{promoFeedback}</span>
-                )}
-              </div>
-            </div>
-
-            <div className="col-span-12 lg:col-span-4 bg-black/60 p-6 rounded-2.5xl border border-slate-900 text-center space-y-4">
-              <span className="text-[9.5px] text-slate-450 font-mono block uppercase">ESTIMATED CYCLE BILLING</span>
-              
-              <div className="space-y-1">
-                <span className="text-4xl font-extrabold text-white font-sans">
-                  ${Math.round(
-                    (licensePlan === 'free' ? 0 : licensePlan === 'pro' ? 29 : licensePlan === 'team' ? 99 : 499) 
-                    * userSeats 
-                    * (isLicenseApplied ? 0.75 : 1)
-                  )}
-                </span>
-                <span className="text-xs text-slate-400 block uppercase font-mono tracking-widest">USD / MONTH</span>
-              </div>
-
-              <button
-                onClick={() => {
-                  playClick(1.6);
-                  showToast(`Simulated Premium ${licensePlan.toUpperCase()} token injected! Alignment drift secured.`, "success");
-                }}
-                className="w-full py-2.5 bg-violet-650 hover:bg-violet-600 text-white font-semibold rounded-xl text-xs font-mono tracking-wide active:scale-95 transition"
-              >
-                PROVISION COGNITIVE LICENSE
-              </button>
-            </div>
-
-          </div>
-
-        </div>
-      )}
-
+        </motion.div>
+      ) : null}
+      </AnimatePresence>
     </div>
   );
 }

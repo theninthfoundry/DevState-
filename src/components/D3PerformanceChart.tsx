@@ -317,19 +317,19 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
   };
 
   // Determine line memory color
-  const memoryColor = isThresholdExceeded ? '#ef4444' : '#8b5cf6';
+  const memoryColor = isThresholdExceeded ? '#ef4444' : '#d4d4d8';
 
   return (
-    <div id="d3-worker-metrics" className="bg-[#0b0d14]/75 border border-slate-800/80 rounded-3xl p-6 shadow-sm select-none relative overflow-hidden">
+    <div id="d3-worker-metrics" className="bg-[#09090b]/75 border border-slate-800/80 rounded-3xl p-6 shadow-sm select-none relative overflow-hidden">
       <div className="absolute inset-0 bg-cover bg-grid-pattern opacity-5"></div>
       
       <div className="flex flex-col xl:flex-row xl:items-center justify-between pb-4 border-b border-slate-850/60 mb-5 gap-4 relative z-10">
         <div>
-          <span className="text-[9.5px] font-black uppercase tracking-widest text-[#00ffd1] font-mono block">
+          <span className="text-[9.5px] font-black uppercase tracking-widest text-[#e4e4e7] font-mono block">
             D3 METRICS TELEMETRY BRIDGE
           </span>
           <h4 className="text-sm font-bold text-slate-205 mt-0.5 font-sans flex items-center gap-1.5">
-            <Cpu className="w-4 h-4 text-[#00ffd1] animate-pulse" />
+            <Cpu className="w-4 h-4 text-[#e4e4e7] animate-pulse" />
             Parallel AST-Parsing Worker Swarm Threads
           </h4>
         </div>
@@ -343,11 +343,11 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             onClick={() => { onTriggerSound(1.1); setShowCpu(!showCpu); }}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-mono transition-all ${
               showCpu 
-                ? 'bg-[#00ffd1]/10 border-[#00ffd1]/30 text-[#00ffd1] font-extrabold shadow-sm' 
+                ? 'bg-[#e4e4e7]/10 border-[#e4e4e7]/30 text-[#e4e4e7] font-extrabold shadow-sm' 
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}
           >
-            <span className="w-1.5 h-1.5 rounded-full bg-[#00ffd1]" />
+            <span className="w-1.5 h-1.5 rounded-full bg-[#e4e4e7]" />
             CPU LOAD: {showCpu ? 'ACTIVE' : 'MUTED'}
           </button>
 
@@ -357,7 +357,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             onClick={() => { onTriggerSound(1.1); setShowMemory(!showMemory); }}
             className={`flex items-center gap-1.5 px-2.5 py-1.5 rounded-xl border text-[11px] font-mono transition-all ${
               showMemory 
-                ? `${isThresholdExceeded ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-violet-500/10 border-violet-500/30 text-violet-400'} font-extrabold shadow-sm` 
+                ? `${isThresholdExceeded ? 'bg-red-500/10 border-red-500/30 text-red-400' : 'bg-zinc-800 border-white/10 text-zinc-300'} font-extrabold shadow-sm` 
                 : 'bg-slate-950/40 border-slate-900 text-slate-500'
             }`}
           >
@@ -373,7 +373,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             className="flex items-center gap-1 px-3 py-1.5 bg-slate-900 hover:bg-slate-850 text-slate-300 font-mono text-xs font-bold border border-slate-800 rounded-xl transition duration-150 active:scale-95"
             title="Download timeseries telemetry record"
           >
-            <Database className="w-3.5 h-3.5 text-[#00ffd1]" />
+            <Database className="w-3.5 h-3.5 text-[#e4e4e7]" />
             EXPORT CSV
           </button>
 
@@ -385,7 +385,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
                 onClick={() => { onTriggerSound(1.05); setActiveMetricMode(mode); }}
                 className={`px-2.5 py-1 text-[10px] font-mono font-bold rounded-lg transition-all ${
                   activeMetricMode === mode 
-                    ? 'bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-extrabold' 
+                    ? 'bg-zinc-800 border border-white/10 text-zinc-300 font-extrabold' 
                     : 'text-slate-500 hover:text-slate-300'
                 }`}
               >
@@ -402,7 +402,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
                 onClick={() => { onTriggerSound(1.15); setIntensity(rate); }}
                 className={`px-2 py-1 text-[9px] font-black rounded-lg transition-all ${
                   intensity === rate 
-                    ? 'bg-[#00ffd1]/10 border border-[#00ffd1]/20 text-[#00ffd1] font-extrabold' 
+                    ? 'bg-[#e4e4e7]/10 border border-[#e4e4e7]/20 text-[#e4e4e7] font-extrabold' 
                     : 'text-slate-500 hover:text-slate-350'
                 }`}
               >
@@ -416,7 +416,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             onClick={() => { onTriggerSound(1.0); setIsPlaying(!isPlaying); }}
             className={`p-1.5 border rounded-xl hover:scale-105 active:scale-95 transition ${
               isPlaying 
-                ? 'bg-[#10b981]/10 border-[#10b981]/25 text-[#10b981]' 
+                ? 'bg-[#d4d4d8]/10 border-[#d4d4d8]/25 text-[#d4d4d8]' 
                 : 'bg-slate-900 border-slate-800 text-slate-400'
             }`}
             title={isPlaying ? "Pause Stream" : "Play Stream"}
@@ -438,7 +438,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
       <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5 relative z-10">
         {workers.map(w => {
           const statusBgColor = w.status === 'ACTIVE' 
-            ? 'bg-emerald-500/10 border-emerald-500/20 text-emerald-400' 
+            ? 'bg-zinc-800 border-white/10 text-zinc-300' 
             : w.status === 'THROTTLED'
             ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
             : 'bg-slate-900 border-slate-850 text-slate-500';
@@ -503,8 +503,8 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
           {/* DEFINITIONS FOR GRADIENTS AND FILTERS */}
           <defs>
             <linearGradient id="cpu-gradient" x1="0" y1="0" x2="0" y2="1">
-              <stop offset="0%" stopColor="#00ffd1" stopOpacity="0.25" />
-              <stop offset="100%" stopColor="#00ffd1" stopOpacity="0.00" />
+              <stop offset="0%" stopColor="#e4e4e7" stopOpacity="0.25" />
+              <stop offset="100%" stopColor="#e4e4e7" stopOpacity="0.00" />
             </linearGradient>
             <linearGradient id="mem-gradient" x1="0" y1="0" x2="0" y2="1">
               <stop offset="0%" stopColor={memoryColor} stopOpacity="0.25" />
@@ -551,7 +551,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
                       x={-10}
                       y={y + 3.5}
                       textAnchor="end"
-                      fill="#00ffd1"
+                      fill="#e4e4e7"
                       fillOpacity="0.8"
                       className="text-[9px] font-mono font-bold leading-none"
                     >
@@ -657,7 +657,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
               <path 
                 d={chartProps.cpuPath}
                 fill="none"
-                stroke="#00ffd1"
+                stroke="#e4e4e7"
                 strokeWidth="2.5"
                 filter="url(#d3-glow)"
                 className="transition-all duration-300 select-none pointer-events-none"
@@ -696,7 +696,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
                     cy={chartProps.yScaleCpu(selectedPoint.cpu)}
                     r="5"
                     fill="#fff"
-                    stroke="#00ffd1"
+                    stroke="#e4e4e7"
                     strokeWidth="3.5"
                   />
                 )}
@@ -723,17 +723,17 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
           <button 
             type="button"
             onClick={() => { onTriggerSound(1.1); setShowCpu(!showCpu); }}
-            className={`flex items-center gap-1.5 transition-all duration-150 ${showCpu ? 'opacity-100 font-extrabold text-[#00ffd1]' : 'opacity-35 text-slate-500'}`}
+            className={`flex items-center gap-1.5 transition-all duration-150 ${showCpu ? 'opacity-100 font-extrabold text-[#e4e4e7]' : 'opacity-35 text-slate-500'}`}
           >
-            <span className="w-2.5 h-2.5 rounded-full bg-[#00ffd1] shadow" />
+            <span className="w-2.5 h-2.5 rounded-full bg-[#e4e4e7] shadow" />
             CPU LOAD
           </button>
           <button 
             type="button"
             onClick={() => { onTriggerSound(1.1); setShowMemory(!showMemory); }}
-            className={`flex items-center gap-1.5 transition-all duration-150 ${showMemory ? 'opacity-100 font-extrabold text-violet-400' : 'opacity-35 text-slate-500'}`}
+            className={`flex items-center gap-1.5 transition-all duration-150 ${showMemory ? 'opacity-100 font-extrabold text-zinc-300' : 'opacity-35 text-slate-500'}`}
           >
-            <span className={`w-2.5 h-2.5 rounded-full ${isThresholdExceeded ? 'bg-red-500 animate-pulse' : 'bg-[#8b5cf6]'} shadow`} />
+            <span className={`w-2.5 h-2.5 rounded-full ${isThresholdExceeded ? 'bg-red-500 animate-pulse' : 'bg-[#d4d4d8]'} shadow`} />
             HEAP RAM
           </button>
         </div>
@@ -743,7 +743,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
           <button
             type="button"
             onClick={handleResetZoom}
-            className="absolute bottom-16 left-5 bg-indigo-950/90 hover:bg-indigo-900/90 border border-indigo-500/35 text-indigo-300 font-mono text-[9px] font-bold px-2.5 py-1 rounded-xl transition-all z-20 shadow-md animate-pulse"
+            className="absolute bottom-16 left-5 bg-white/5 hover:bg-white/10 border border-white/10 text-zinc-200 font-mono text-[9px] font-bold px-2.5 py-1 rounded-xl transition-all z-20 shadow-md animate-pulse"
           >
             🔍 RESET ZOOM SCALE
           </button>
@@ -757,7 +757,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             </div>
             {showCpu && (activeMetricMode === 'BOTH' || activeMetricMode === 'CPU') && (
               <div className="flex items-center justify-between gap-1">
-                <span className="text-[#00ffd1] font-bold">Worker CPU:</span>
+                <span className="text-[#e4e4e7] font-bold">Worker CPU:</span>
                 <span className="font-extrabold text-slate-105">{selectedPoint.cpu}%</span>
               </div>
             )}
@@ -769,7 +769,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
             )}
             <div className="flex items-center justify-between gap-1 border-t border-slate-900/50 pt-1 text-[9.5px]">
               <span className="text-slate-500">AST Task Queue:</span>
-              <span className="font-bold text-indigo-400">{selectedPoint.queueSize} remaining</span>
+              <span className="font-bold text-zinc-300">{selectedPoint.queueSize} remaining</span>
             </div>
           </div>
         )}
@@ -782,7 +782,7 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
           Interactive D3 Pan/Zoom Active | Scroll over chart area to explore segment history
         </span>
         <span className="text-right">
-          Memory state: <strong className={isThresholdExceeded ? "text-red-400" : "text-indigo-400"}>{isThresholdExceeded ? "CRITICAL (ABOVE 400MB)" : "STEADY (<400MB)"}</strong>
+          Memory state: <strong className={isThresholdExceeded ? "text-red-400" : "text-zinc-300"}>{isThresholdExceeded ? "CRITICAL (ABOVE 400MB)" : "STEADY (<400MB)"}</strong>
         </span>
       </div>
     </div>

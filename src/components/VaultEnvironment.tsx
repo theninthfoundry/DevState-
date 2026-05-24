@@ -39,6 +39,8 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
   
   // Search state
   const [searchTerm, setSearchTerm] = useState('');
+  const [selectedCategory, setSelectedCategory] = useState<string>('All');
+  const [sortBy, setSortBy] = useState<'none' | 'expiry-asc'>('none');
 
   // SECRETS STATE
   const [secretsList, setSecretsList] = useState<VaultSecret[]>([
@@ -149,15 +151,15 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                 <motion.div 
                   animate={{ rotate: 360 }}
                   transition={{ repeat: Infinity, duration: 25, ease: "linear" }}
-                  className="w-48 h-48 rounded-full border-8 border-dashed border-sky-500/25 flex items-center justify-center"
+                  className="w-48 h-48 rounded-full border-8 border-dashed border-white/10 flex items-center justify-center"
                 />
                 <div className="absolute w-36 h-36 rounded-full bg-[#0d1326] border-4 border-slate-755 border-slate-800 flex items-center justify-center shadow-2xl">
-                  <Lock className="w-16 h-16 text-sky-400 animate-pulse" />
+                  <Lock className="w-16 h-16 text-zinc-300 animate-pulse" />
                 </div>
               </div>
 
               <div>
-                <span className="text-[10px] font-mono tracking-widest text-sky-400 font-extrabold uppercase block">
+                <span className="text-[10px] font-mono tracking-widest text-zinc-300 font-extrabold uppercase block">
                   FORT_KNOX SECURE_LEVEL_5 INTEL
                 </span>
                 <h3 className="text-xl font-bold tracking-tight text-white mt-1">
@@ -170,7 +172,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
 
               <button
                 onClick={() => { onTriggerSound(1.6); setIsVaultClosed(false); onTriggerNotification("CIPHER VAULT DECRYPTED SECURELY", "success"); }}
-                className="px-6 py-3 bg-gradient-to-r from-sky-600 to-indigo-650 bg-gradient-to-r from-sky-700 to-indigo-700 hover:from-sky-600 hover:to-indigo-600 text-white font-mono font-black text-xs uppercase tracking-wide rounded-xl shadow-lg shadow-sky-955/20 active:scale-95 transition cursor-pointer"
+                className="px-6 py-3 bg-gradient-to-r from-zinc-800 to-indigo-650 bg-gradient-to-r from-sky-700 to-indigo-700 hover:from-zinc-800 hover:to-zinc-900 text-white font-mono font-black text-xs uppercase tracking-wide rounded-xl shadow-lg shadow-sky-955/20 active:scale-95 transition cursor-pointer"
               >
                 UNLOCK PRIVATE SECRETS
               </button>
@@ -180,12 +182,12 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
       </AnimatePresence>
 
       {/* REGULAR VAULT SECURE HEADBOARD */}
-      <div className="bg-[#0b0d14]/80 backdrop-blur-md border border-sky-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-sky-500/5 rounded-full filter blur-2xl pointer-events-none animate-pulse"></div>
+      <div className="bg-[#09090b]/80 backdrop-blur-md border border-sky-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-800 rounded-full filter blur-2xl pointer-events-none animate-pulse"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2">
-            <Unlock className="w-4 h-4 text-sky-400 shrink-0" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-sky-400 font-mono">
+            <Unlock className="w-4 h-4 text-zinc-300 shrink-0" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300 font-mono">
               CIPHER ENCRYPTED ENVIRONMENT VAULT
             </span>
           </div>
@@ -226,7 +228,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
               onClick={() => { onTriggerSound(1.0); setActiveTab(tab.id as any); }}
               className={`px-3.5 py-2 text-[10.5px] font-mono font-bold rounded-xl whitespace-nowrap transition cursor-pointer border ${
                 activeTab === tab.id 
-                  ? 'bg-sky-500/10 border-sky-500/30 text-sky-400 font-extrabold' 
+                  ? 'bg-zinc-800 border-white/10 text-zinc-300 font-extrabold' 
                   : 'bg-transparent border-transparent text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -258,30 +260,77 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
               <span className="text-[10px] text-sky-450 font-mono">STATUS: HIGH_INTEGRITY</span>
             </h3>
 
+            {/* Secrets Filter and Sorting control bar */}
+            <div className="flex flex-wrap items-center justify-between gap-3 bg-slate-950/40 p-3 rounded-2xl border border-slate-900/60">
+              {/* Category Filters */}
+              <div className="flex flex-wrap items-center gap-1.5">
+                <span className="text-[10px] text-slate-550 font-mono font-bold uppercase mr-1">Filter:</span>
+                {['All', 'API Key', 'DB Url', 'SSH Key', 'Certificate'].map((cat) => (
+                  <button
+                    key={cat}
+                    onClick={() => {
+                      onTriggerSound(1.1);
+                      setSelectedCategory(cat);
+                    }}
+                    className={`px-2.5 py-1 text-[10px] font-mono rounded-lg transition-all border ${
+                      selectedCategory === cat
+                        ? 'bg-zinc-800 border-white/10 text-zinc-300 font-extrabold'
+                        : 'bg-transparent border-transparent text-slate-500 hover:text-slate-350'
+                    }`}
+                  >
+                    {cat.toUpperCase()}
+                  </button>
+                ))}
+              </div>
+
+              {/* Sorting Switch */}
+              <button
+                onClick={() => {
+                  onTriggerSound(1.15);
+                  setSortBy(prev => prev === 'none' ? 'expiry-asc' : 'none');
+                }}
+                className={`flex items-center gap-1.5 px-3 py-1.5 text-[10px] font-mono font-bold rounded-lg transition border ${
+                  sortBy === 'expiry-asc'
+                    ? 'bg-amber-500/10 border-amber-500/30 text-amber-400 font-extrabold'
+                    : 'bg-slate-900 border-slate-850 text-slate-450 hover:text-slate-300 hover:bg-slate-850'
+                }`}
+              >
+                <Sliders className="w-3 h-3" />
+                {sortBy === 'expiry-asc' ? 'SHORTEST EXPIRY' : 'DEFAULT SORT'}
+              </button>
+            </div>
+
             <div className="space-y-3">
               {secretsList
                 .filter(s => {
+                  if (selectedCategory !== 'All' && s.category !== selectedCategory) return false;
                   if (!searchTerm) return true;
                   return s.name.toLowerCase().includes(searchTerm.toLowerCase()) || 
                          s.category.toLowerCase().includes(searchTerm.toLowerCase());
+                })
+                .sort((a, b) => {
+                  if (sortBy === 'expiry-asc') {
+                    return a.expiryDays - b.expiryDays;
+                  }
+                  return 0;
                 })
                 .map((secret) => {
                   const isRevealed = !!revealedSecrets[secret.id];
                   return (
                     <div key={secret.id} className="p-4 bg-slate-950/70 border border-slate-900 rounded-2xl flex flex-col md:flex-row md:items-center justify-between gap-4">
                       <div className="flex items-start gap-3">
-                        <div className="p-2.5 bg-sky-500/5 border border-sky-500/20 text-sky-400 rounded-xl mt-0.5">
+                        <div className="p-2.5 bg-zinc-800 border border-white/10 text-zinc-300 rounded-xl mt-0.5">
                           <Key className="w-4 h-4" />
                         </div>
                         <div>
                           <div className="flex items-center gap-2">
                             <span className="font-sans font-bold text-slate-200 text-xs">{secret.name}</span>
-                            <span className="text-[9px] font-mono bg-sky-950 text-sky-400 border border-sky-900/30 px-1.5 py-0.5 rounded uppercase">
+                            <span className="text-[9px] font-mono bg-white/5 text-zinc-300 border border-white/5 px-1.5 py-0.5 rounded uppercase">
                               {secret.environment}
                             </span>
                           </div>
                           <p className="text-[10px] text-slate-550 font-mono mt-1">
-                            Type: {secret.category} | Last accessed: {secret.lastUsed}
+                            Type: {secret.category} | Last accessed: {secret.lastUsed} | Expiry: {secret.expiryDays} days
                           </p>
                           <div className="mt-2 text-xs font-mono bg-[#030509] p-2.5 rounded-xl border border-slate-900 flex items-center justify-between max-w-md">
                             <span className="truncate max-w-[280px]">
@@ -299,7 +348,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                                 onClick={() => copyToClipboardSimulated(secret.id, secret.value, secret.name)}
                                 className="text-slate-500 hover:text-white"
                               >
-                                {copiedId === secret.id ? <Check className="w-3.5 h-3.5 text-emerald-400" /> : <Copy className="w-3.5 h-3.5" />}
+                                {copiedId === secret.id ? <Check className="w-3.5 h-3.5 text-zinc-300" /> : <Copy className="w-3.5 h-3.5" />}
                               </button>
                             </div>
                           </div>
@@ -309,9 +358,25 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                       <div className="flex items-center gap-2 md:self-end">
                         <button
                           onClick={() => forceRotateKey(secret.id, secret.name)}
-                          className="px-3 py-1.5 bg-sky-500/10 hover:bg-sky-500/20 border border-sky-500/30 text-sky-400 font-mono text-[10px] font-bold rounded-lg cursor-pointer transition"
+                          className="px-3 py-1.5 bg-zinc-800 hover:bg-zinc-800 border border-white/10 text-zinc-300 font-mono text-[10px] font-bold rounded-lg cursor-pointer transition"
                         >
                           Manual Cycle
+                        </button>
+                        <button
+                          onClick={() => {
+                            onTriggerSound(1.5);
+                            setSecretsList(prev => prev.filter(s => s.id !== secret.id));
+                            onTriggerNotification(`Secret '${secret.name}' has been successfully deleted.`, 'error');
+                            const time = new Date().toTimeString().split(' ')[0];
+                            setAuditLogs(logs => [
+                              { id: Date.now().toString(), timestamp: time, user: 'namireddysreeshanth@gmail.com', action: 'DELETE_SECRET', secret: secret.name },
+                              ...logs
+                            ]);
+                          }}
+                          className="p-2 bg-rose-500/10 hover:bg-rose-500/25 border border-rose-500/30 text-rose-450 hover:text-rose-400 rounded-lg cursor-pointer transition"
+                          title="Delete secret"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
                         </button>
                       </div>
                     </div>
@@ -363,7 +428,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                     key={env}
                     onClick={() => { onTriggerSound(1.0); setMatrixEnv(env); }}
                     className={`px-3 py-1 text-[10px] font-mono leading-none rounded-lg uppercase tracking-wide transition ${
-                      matrixEnv === env ? 'bg-sky-600/20 border border-sky-500/30 text-sky-400 font-black' : 'text-slate-500'
+                      matrixEnv === env ? 'bg-zinc-800 border border-white/10 text-zinc-300 font-black' : 'text-slate-500'
                     }`}
                   >
                     {env}
@@ -380,7 +445,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
               ].map((item, idx) => (
                 <div key={idx} className="p-3 bg-slate-950 border border-slate-900 rounded-xl flex justify-between items-center text-xs font-mono">
                   <span className="text-slate-400 font-black">{item.key}</span>
-                  <span className="text-slate-205 text-[#00ffd1]">{item.val}</span>
+                  <span className="text-slate-205 text-[#e4e4e7]">{item.val}</span>
                 </div>
               ))}
             </div>
@@ -414,11 +479,11 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
             {auditLogs.map((log) => (
               <div key={log.id} className="p-3 bg-slate-950 border border-slate-900 rounded-xl flex flex-col sm:flex-row sm:items-center justify-between text-xs font-mono gap-2 text-slate-350">
                 <div className="flex items-center gap-2">
-                  <span className="text-sky-400">[{log.timestamp}]</span>
+                  <span className="text-zinc-300">[{log.timestamp}]</span>
                   <span className="text-slate-500 font-black">{log.action}</span>
                 </div>
                 <div>
-                  <span className="text-indigo-400">Key: {log.secret}</span> | Operator: <span className="text-slate-300 font-medium">{log.user}</span>
+                  <span className="text-zinc-300">Key: {log.secret}</span> | Operator: <span className="text-slate-300 font-medium">{log.user}</span>
                 </div>
               </div>
             ))}
@@ -442,7 +507,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                   type="text"
                   value={prehookCommand}
                   onChange={e => setPrehookCommand(e.target.value)}
-                  className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono text-emerald-400 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
+                  className="w-full bg-slate-950 border border-slate-900 rounded-xl px-3.5 py-2.5 text-xs font-mono text-zinc-300 focus:outline-none focus:ring-1 focus:ring-sky-500/40"
                 />
               </div>
 
@@ -478,7 +543,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
 
               <div className="flex items-center justify-between mt-4">
                 <span className={`text-[9px] font-mono font-bold leading-none px-1.5 py-1 rounded border ${
-                  hub.path === 'INTEGRATED' ? 'text-emerald-405 text-emerald-400 border-emerald-900/30 bg-emerald-950/20' : 'text-slate-500 border-slate-900 bg-slate-950'
+                  hub.path === 'INTEGRATED' ? 'text-violet-405 text-zinc-300 border-white/5 bg-white/5' : 'text-slate-500 border-slate-900 bg-slate-950'
                 }`}>
                   {hub.path}
                 </span>
@@ -512,7 +577,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                 </p>
               </div>
               <div className="p-4 bg-slate-950 border border-slate-900 rounded-2xl">
-                <span className="block font-bold text-xs text-[#00ffd1] font-mono font-black">STABLE SANITY INDEX</span>
+                <span className="block font-bold text-xs text-[#e4e4e7] font-mono font-black">STABLE SANITY INDEX</span>
                 <p className="text-[11px] font-mono text-slate-450 mt-1 font-medium">
                   All 8 production environment variables conform securely to schema structures.
                 </p>
@@ -546,7 +611,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
 
               <button
                 onClick={createTemporalOneTimeLink}
-                className="px-4 py-2 bg-gradient-to-r from-sky-600 to-indigo-650 bg-gradient-to-r from-sky-700 to-indigo-700 hover:from-sky-600 hover:to-indigo-600 font-black text-xs font-mono uppercase text-white rounded-xl transition cursor-pointer"
+                className="px-4 py-2 bg-gradient-to-r from-zinc-800 to-indigo-650 bg-gradient-to-r from-sky-700 to-indigo-700 hover:from-zinc-800 hover:to-zinc-900 font-black text-xs font-mono uppercase text-white rounded-xl transition cursor-pointer"
               >
                 GENERATE ONE-TIME VISITATION LINK
               </button>
@@ -559,7 +624,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
                       type="text"
                       readOnly
                       value={temporaryLink}
-                      className="flex-1 bg-[#000] border border-slate-900 rounded p-1.5 text-sky-400 select-all"
+                      className="flex-1 bg-[#000] border border-slate-900 rounded p-1.5 text-zinc-300 select-all"
                     />
                     <button 
                       onClick={() => copyToClipboardSimulated('copiedTemp', temporaryLink, 'Disposable link')}
@@ -577,7 +642,7 @@ export default function VaultEnvironment({ onTriggerSound, onTriggerNotification
           </div>
 
           <div className="lg:col-span-5 bg-slate-955 bg-slate-950 border border-slate-900 rounded-3xl p-5 text-center flex flex-col justify-center space-y-3 py-12">
-            <Share2 className="w-10 h-10 text-sky-400 mx-auto stroke-1" />
+            <Share2 className="w-10 h-10 text-zinc-300 mx-auto stroke-1" />
             <h5 className="text-xs font-bold text-white font-sans">Zero-Knowledge ciphering</h5>
             <p className="text-[11px] font-mono text-slate-550 max-w-xs mx-auto leading-normal">
               Encrypted value parameters are parsed only inside browser RAM via dynamic tokens, bypassing central database files.

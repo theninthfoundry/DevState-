@@ -1,4 +1,4 @@
-import { scanWorkspace } from "./workspaceScanner";
+import { scanWorkspace, getScanProgress } from "./workspaceScanner";
 import { analyzeProjectState, askAssistant, analyzeCognitionTool } from "./geminiService";
 import { execSync } from "child_process";
 import * as path from "path";
@@ -101,9 +101,15 @@ export async function handleApiRequest(req: any, res: any) {
 
   try {
     if (pathname === "/api/workspace" && req.method === "GET") {
-      const summary = scanWorkspace(workspaceRoot);
+      const summary = await scanWorkspace(workspaceRoot);
       const vision = getPersistedVision();
       sendResponse(res, 200, { summary, vision });
+      return;
+    }
+
+    if (pathname === "/api/workspace/progress" && req.method === "GET") {
+      const progress = getScanProgress();
+      sendResponse(res, 200, progress);
       return;
     }
 
@@ -115,7 +121,7 @@ export async function handleApiRequest(req: any, res: any) {
       // Persist the user's vision spec on-the-fly!
       persistVision(visionSpec);
 
-      const summary = scanWorkspace(workspaceRoot);
+      const summary = await scanWorkspace(workspaceRoot);
       const analysis = await analyzeProjectState(visionSpec, summary, terminalLogs);
       sendResponse(res, 200, { success: true, analysis, summary });
       return;
@@ -127,7 +133,7 @@ export async function handleApiRequest(req: any, res: any) {
       const history = body.history || [];
       const visionSpec = body.visionSpec || "";
 
-      const summary = scanWorkspace(workspaceRoot);
+      const summary = await scanWorkspace(workspaceRoot);
       const responseText = await askAssistant(message, history, visionSpec, summary);
       sendResponse(res, 200, { response: responseText });
       return;
@@ -143,7 +149,7 @@ export async function handleApiRequest(req: any, res: any) {
         return;
       }
 
-      const summary = scanWorkspace(workspaceRoot);
+      const summary = await scanWorkspace(workspaceRoot);
       const result = await analyzeCognitionTool(toolId, summary, visionSpec);
       sendResponse(res, 200, result);
       return;

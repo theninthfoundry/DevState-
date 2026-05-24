@@ -497,7 +497,7 @@ Return a valid, highly polished JSON object matching the following structure:
     }
   ],
   "visualizationData": {
-    "nodes": [ { "id": "1", "label": "Label", "val": 10, "color": "#8b5cf6" } ],
+    "nodes": [ { "id": "1", "label": "Label", "val": 10, "color": "#d4d4d8" } ],
     "links": [ { "source": "1", "target": "2", "value": 2 } ]
   },
   "assistantExplanation": "A beautiful 3-4 sentence narrative explaining this tool's telemetry results and the architectural path forward."
@@ -600,9 +600,9 @@ const fileContent = await fs.readFile(fullPath, 'utf8');`
       visualizationData: {
         nodes: [
           { id: "App.tsx", label: "App.tsx (Main Module)", val: 18, color: "#f43f5e" },
-          { id: "apiHandler.ts", label: "apiHandler.ts (API Server)", val: 12, color: "#8b5cf6" },
-          { id: "workspaceScanner.ts", label: "workspaceScanner.ts (FS Crawler)", val: 10, color: "#10b981" },
-          { id: "geminiService.ts", label: "geminiService.ts (LLM proxy)", val: 11, color: "#6366f1" }
+          { id: "apiHandler.ts", label: "apiHandler.ts (API Server)", val: 12, color: "#d4d4d8" },
+          { id: "workspaceScanner.ts", label: "workspaceScanner.ts (FS Crawler)", val: 10, color: "#d4d4d8" },
+          { id: "geminiService.ts", label: "geminiService.ts (LLM proxy)", val: 11, color: "#a1a1aa" }
         ],
         links: [
           { source: "App.tsx", target: "apiHandler.ts", value: 4 },
@@ -649,8 +649,8 @@ export const useHUDStore = create<HUDStore>((set) => ({
       visualizationData: {
         nodes: [
           { id: "App_monolithic", label: "App.tsx (Monolithic state)", val: 16, color: "#ec4899" },
-          { id: "useHUDStore", label: "useHUDStore.ts (State module)", val: 12, color: "#10b981" },
-          { id: "App_refactored", label: "App.tsx (Clean view)", val: 11, color: "#8b5cf6" }
+          { id: "useHUDStore", label: "useHUDStore.ts (State module)", val: 12, color: "#d4d4d8" },
+          { id: "App_refactored", label: "App.tsx (Clean view)", val: 11, color: "#d4d4d8" }
         ],
         links: [
           { source: "App_monolithic", target: "useHUDStore", value: 5 },
@@ -690,7 +690,7 @@ export const useHUDStore = create<HUDStore>((set) => ({
       visualizationData: {
         nodes: [
           { id: "Specs", label: "Vision Specs Blueprint", val: 14, color: "#3b82f6" },
-          { id: "Code", label: "Implementation Layer", val: 12, color: "#10b981" },
+          { id: "Code", label: "Implementation Layer", val: 12, color: "#d4d4d8" },
           { id: "Gaps", label: "Cognitive Gaps Identified", val: 8, color: "#ef4444" }
         ],
         links: [
@@ -732,8 +732,8 @@ export function getCachedScan(): WorkspaceSummary {
       visualizationData: {
         nodes: [
           { id: "crawler", label: "FS Directory Crawler (1.8s)", val: 15, color: "#f59e0b" },
-          { id: "db_cache", label: "State Cache Layer (0.4ms)", val: 11, color: "#10b981" },
-          { id: "api", label: "API Controller Gate", val: 12, color: "#8b5cf6" }
+          { id: "db_cache", label: "State Cache Layer (0.4ms)", val: 11, color: "#d4d4d8" },
+          { id: "api", label: "API Controller Gate", val: 12, color: "#d4d4d8" }
         ],
         links: [
           { source: "crawler", target: "api", value: 5 },
@@ -766,7 +766,7 @@ export function getCachedScan(): WorkspaceSummary {
       ],
       visualizationData: {
         nodes: [
-          { id: "active_imports", label: "Active Imports (React, Lucide, Express)", val: 15, color: "#10b981" },
+          { id: "active_imports", label: "Active Imports (React, Lucide, Express)", val: 15, color: "#d4d4d8" },
           { id: "zombie_deps", label: "Zombie Dependencies (dotenv, esbuild types)", val: 8, color: "#94a3b8" }
         ],
         links: [
@@ -799,8 +799,8 @@ export function getCachedScan(): WorkspaceSummary {
       ],
       visualizationData: {
         nodes: [
-          { id: "tsc", label: "TSC Compiler (Build Lane)", val: 14, color: "#8b5cf6" },
-          { id: "vite", label: "Vite Bundler (GPU asset list)", val: 13, color: "#10b981" },
+          { id: "tsc", label: "TSC Compiler (Build Lane)", val: 14, color: "#d4d4d8" },
+          { id: "vite", label: "Vite Bundler (GPU asset list)", val: 13, color: "#d4d4d8" },
           { id: "outputs", label: "Built bundle dist/", val: 11, color: "#3b82f6" }
         ],
         links: [
@@ -833,7 +833,7 @@ const currentFuel = state.caffeineFuel;`
       ],
       visualizationData: {
         nodes: [
-          { id: "focus_state", label: "Deep Focus (88%)", val: 14, color: "#10b981" },
+          { id: "focus_state", label: "Deep Focus (88%)", val: 14, color: "#d4d4d8" },
           { id: "refuel", label: "Refuel Buffer", val: 12, color: "#f59e0b" },
           { id: "friction", label: "Workflow Friction (None)", val: 8, color: "#64748b" }
         ],
@@ -879,8 +879,8 @@ fastify.register(async function (fastify) {
       ],
       visualizationData: {
         nodes: [
-          { id: "blueprint", label: "Selected Blueprint Template", val: 15, color: "#8b5cf6" },
-          { id: "target", label: "Physical Code Target (HUD)", val: 12, color: "#10b981" }
+          { id: "blueprint", label: "Selected Blueprint Template", val: 15, color: "#d4d4d8" },
+          { id: "target", label: "Physical Code Target (HUD)", val: 12, color: "#d4d4d8" }
         ],
         links: [
           { source: "blueprint", target: "target", value: 4 }

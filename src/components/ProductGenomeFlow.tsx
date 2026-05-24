@@ -107,7 +107,7 @@ export default function ProductGenomeFlow() {
       {/* Title */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-900 pb-5">
         <div>
-          <span className="text-[10px] font-mono font-black text-emerald-400 bg-emerald-950/20 border border-emerald-900/40 px-2.5 py-1 rounded-md tracking-wider uppercase">
+          <span className="text-[10px] font-mono font-black text-zinc-300 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md tracking-wider uppercase">
             Product Cockpit & Memory
           </span>
           <h2 className="text-xl font-bold tracking-tight text-white mt-2">
@@ -153,7 +153,7 @@ export default function ProductGenomeFlow() {
           
           {/* Big Circular composite meter (4 columns) */}
           <div className="lg:col-span-4 bg-[#07090e]/95 border border-slate-900 rounded-3xl p-5 flex flex-col justify-between relative overflow-hidden">
-            <div className="absolute top-0 right-0 w-28 h-28 bg-emerald-500/5 rounded-full blur-2xl pointer-events-none"></div>
+            <div className="absolute top-0 right-0 w-28 h-28 bg-zinc-800 rounded-full blur-2xl pointer-events-none"></div>
 
             <div className="space-y-4">
               <span className="text-[9px] font-bold font-mono uppercase tracking-wider text-slate-500 block">
@@ -170,7 +170,7 @@ export default function ProductGenomeFlow() {
                     r="46"
                     strokeWidth="6"
                     stroke="currentColor"
-                    className="text-emerald-400"
+                    className="text-zinc-300"
                     fill="transparent"
                     strokeDasharray="289.02"
                     strokeDashoffset={289.02 * (1 - (aggregateScore / 100))}
@@ -178,7 +178,7 @@ export default function ProductGenomeFlow() {
                   />
                 </svg>
                 <div className="absolute text-center">
-                  <span className="text-3xl font-black text-emerald-400 block font-sans">{aggregateScore}%</span>
+                  <span className="text-3xl font-black text-zinc-300 block font-sans">{aggregateScore}%</span>
                   <span className="text-[8px] text-slate-550 font-black uppercase tracking-widest block font-sans">Ready Match</span>
                 </div>
               </div>
@@ -186,15 +186,15 @@ export default function ProductGenomeFlow() {
               {/* Milestone path lines */}
               <div className="space-y-2 pt-2 text-[10.5px] font-mono select-none">
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-zinc-800 shrink-0" />
                   <span className="text-slate-450">Core Systems Core Framework (Sprint 1) - Complete</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-emerald-500 shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-zinc-800 shrink-0" />
                   <span className="text-slate-450">Holographic Universe Interface - Complete</span>
                 </div>
                 <div className="flex items-center gap-2">
-                  <span className="w-2 h-2 rounded-full bg-indigo-500 animate-pulse shrink-0" />
+                  <span className="w-2 h-2 rounded-full bg-zinc-800 animate-pulse shrink-0" />
                   <span className="text-white">Enterprise Scalability Audit (Active)</span>
                 </div>
               </div>
@@ -220,7 +220,7 @@ export default function ProductGenomeFlow() {
                 <div key={met.label} className="p-3.5 bg-[#07090e]/80 border border-slate-900 rounded-2xl space-y-2 relative overflow-hidden select-text">
                   <div className="flex items-center justify-between text-xs font-bold font-mono">
                     <span className="text-white">{met.label}</span>
-                    <span className="text-emerald-400 font-extrabold">{met.val}%</span>
+                    <span className="text-zinc-300 font-extrabold">{met.val}%</span>
                   </div>
 
                   <p className="text-[10.5px] text-slate-450 leading-relaxed font-sans font-medium">
@@ -229,7 +229,7 @@ export default function ProductGenomeFlow() {
 
                   <div className="w-full bg-slate-950 h-1.5 rounded-full overflow-hidden">
                     <div 
-                      className="bg-emerald-500 h-full rounded-full transition-all duration-1000" 
+                      className="bg-zinc-800 h-full rounded-full transition-all duration-1000" 
                       style={{ width: `${met.val}%` }} 
                     />
                   </div>
@@ -273,7 +273,7 @@ export default function ProductGenomeFlow() {
                     <span className="text-[#a78bfa]">Minimal (21%)</span>
                   </div>
                   <div className="h-1.5 w-full bg-slate-900 rounded-full overflow-hidden select-none">
-                    <div className="bg-indigo-500 h-full rounded-full" style={{ width: '21%' }} />
+                    <div className="bg-zinc-800 h-full rounded-full" style={{ width: '21%' }} />
                   </div>
                   <span className="text-[9px] text-slate-550 italic select-text block pt-1 leading-normal">
                     Typing sequences and execution cycles represent high-resonance focus patterns. No strain anomalies.
@@ -332,7 +332,7 @@ export default function ProductGenomeFlow() {
                   <div key={idx} className="flex-1 flex flex-col items-center gap-1">
                     <div 
                       className={`w-full rounded-t-md transition-all duration-1000 ${
-                        val > 80 ? 'bg-indigo-500' : val > 50 ? 'bg-violet-600' : 'bg-slate-750'
+                        val > 80 ? 'bg-zinc-800' : val > 50 ? 'bg-zinc-800' : 'bg-slate-750'
                       }`} 
                       style={{ height: `${val * 0.75}px` }} 
                     />
@@ -345,7 +345,7 @@ export default function ProductGenomeFlow() {
             {/* Action Recommendations */}
             <div className="bg-[#0b0c15] border border-slate-900 p-3.5 rounded-2xl space-y-2 select-text mt-4">
               <span className="text-[10.5px] font-mono text-white flex items-center gap-1.5 font-bold">
-                <Lightbulb className="w-4 h-4 text-violet-400" />
+                <Lightbulb className="w-4 h-4 text-zinc-300" />
                 Adaptive Workflow Directives
               </span>
 
@@ -388,7 +388,7 @@ export default function ProductGenomeFlow() {
                     onClick={() => setSelectedEraIndex(idx)}
                     className={`text-center font-bold px-3 py-1.5 rounded-xl border transition ${
                       selectedEraIndex === idx
-                        ? 'bg-violet-950/40 text-[#a78bfa] border-violet-900/40 font-extrabold shadow-sm'
+                        ? 'bg-white/5 text-[#a78bfa] border-white/5 font-extrabold shadow-sm'
                         : 'text-slate-500 border-transparent hover:text-slate-300'
                     }`}
                   >
@@ -418,7 +418,7 @@ export default function ProductGenomeFlow() {
                 </div>
                 <div className="flex items-center justify-between text-slate-500">
                   <span>Workspace Alignment Score:</span>
-                  <span className="text-emerald-400 font-extrabold">{era.alignmentRating}%</span>
+                  <span className="text-zinc-300 font-extrabold">{era.alignmentRating}%</span>
                 </div>
                 <div className="flex items-center justify-between text-slate-500 border-t border-slate-900 pt-1.5 select-none">
                   <span>{era.metricLabel}:</span>

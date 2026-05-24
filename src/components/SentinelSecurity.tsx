@@ -175,7 +175,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
     <div id="sentinel-security-noc" className="space-y-6 select-text text-slate-100">
       
       {/* SECTION HEADER BLOCK */}
-      <div className="bg-[#0b0d14]/80 backdrop-blur-md border border-red-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+      <div className="bg-[#09090b]/80 backdrop-blur-md border border-red-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
         <div className="absolute top-0 right-0 w-80 h-80 bg-red-500/5 rounded-full filter blur-2xl pointer-events-none animate-pulse"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2">
@@ -324,7 +324,37 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
             </h4>
 
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-              <div className="bg-red-950/10 border border-red-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4">
+              <motion.div 
+                className="bg-red-950/10 border border-red-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4"
+                animate={{
+                  borderColor: ["rgba(239, 68, 68, 0.2)", "rgba(239, 68, 68, 0.6)", "rgba(239, 68, 68, 0.2)"],
+                  boxShadow: [
+                    "0 0 0 0 rgba(239, 68, 68, 0)",
+                    "0 0 14px 2px rgba(239, 68, 68, 0.15)",
+                    "0 0 0 0 rgba(239, 68, 68, 0)"
+                  ]
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.0,
+                  ease: "easeInOut"
+                }}
+              >
+                {/* Visual Radar Sensor Ring Pulse */}
+                <div className="absolute top-2.5 right-2.5 flex items-center justify-center w-6 h-6">
+                  <motion.div 
+                    className="absolute w-2 h-2 rounded-full bg-red-500" 
+                    animate={{ scale: [1, 1.25, 1] }} 
+                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeInOut" }}
+                  />
+                  <motion.div 
+                    className="absolute w-4 h-4 rounded-full border border-red-500/50" 
+                    initial={{ scale: 0.5, opacity: 1 }}
+                    animate={{ scale: 2.5, opacity: 0 }} 
+                    transition={{ repeat: Infinity, duration: 2.0, ease: "easeOut" }}
+                  />
+                </div>
+
                 <div className="p-3 bg-red-500/10 rounded-2xl border border-red-500/30 text-red-400 shrink-0">
                   <Key className="w-5 h-5 animate-pulse" />
                 </div>
@@ -335,9 +365,39 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                   </p>
                   <span className="text-[9.5px] font-mono text-slate-550 block mt-2">DANGER MATRIX: EXTREMEMENT CRITIQUE</span>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="bg-amber-950/10 border border-amber-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4">
+              <motion.div 
+                className="bg-amber-950/10 border border-amber-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4"
+                animate={{
+                  borderColor: ["rgba(245, 158, 11, 0.2)", "rgba(245, 158, 11, 0.6)", "rgba(245, 158, 11, 0.2)"],
+                  boxShadow: [
+                    "0 0 0 0 rgba(245, 158, 11, 0)",
+                    "0 0 14px 2px rgba(245, 158, 11, 0.15)",
+                    "0 0 0 0 rgba(245, 158, 11, 0)"
+                  ]
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.2,
+                  ease: "easeInOut"
+                }}
+              >
+                {/* Visual Radar Sensor Ring Pulse */}
+                <div className="absolute top-2.5 right-2.5 flex items-center justify-center w-6 h-6">
+                  <motion.div 
+                    className="absolute w-2 h-2 rounded-full bg-amber-500" 
+                    animate={{ scale: [1, 1.25, 1] }} 
+                    transition={{ repeat: Infinity, duration: 2.2, ease: "easeInOut" }}
+                  />
+                  <motion.div 
+                    className="absolute w-4 h-4 rounded-full border border-amber-500/50" 
+                    initial={{ scale: 0.5, opacity: 1 }}
+                    animate={{ scale: 2.5, opacity: 0 }} 
+                    transition={{ repeat: Infinity, duration: 2.2, ease: "easeOut" }}
+                  />
+                </div>
+
                 <div className="p-3 bg-amber-500/10 rounded-2xl border border-amber-500/30 text-amber-500 shrink-0">
                   <AlertTriangle className="w-5 h-5" />
                 </div>
@@ -348,9 +408,39 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                   </p>
                   <span className="text-[9.5px] font-mono text-slate-550 block mt-2">DANGER MATRIX: SEC_HIGH</span>
                 </div>
-              </div>
+              </motion.div>
 
-              <div className="bg-orange-950/10 border border-orange-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4">
+              <motion.div 
+                className="bg-orange-950/10 border border-orange-500/20 p-4 rounded-2.5xl relative overflow-hidden flex items-start gap-4"
+                animate={{
+                  borderColor: ["rgba(249, 115, 22, 0.2)", "rgba(249, 115, 22, 0.6)", "rgba(249, 115, 22, 0.2)"],
+                  boxShadow: [
+                    "0 0 0 0 rgba(249, 115, 22, 0)",
+                    "0 0 14px 2px rgba(249, 115, 22, 0.15)",
+                    "0 0 0 0 rgba(249, 115, 22, 0)"
+                  ]
+                }}
+                transition={{
+                  repeat: Infinity,
+                  duration: 2.4,
+                  ease: "easeInOut"
+                }}
+              >
+                {/* Visual Radar Sensor Ring Pulse */}
+                <div className="absolute top-2.5 right-2.5 flex items-center justify-center w-6 h-6">
+                  <motion.div 
+                    className="absolute w-2 h-2 rounded-full bg-orange-500" 
+                    animate={{ scale: [1, 1.25, 1] }} 
+                    transition={{ repeat: Infinity, duration: 2.4, ease: "easeInOut" }}
+                  />
+                  <motion.div 
+                    className="absolute w-4 h-4 rounded-full border border-orange-500/50" 
+                    initial={{ scale: 0.5, opacity: 1 }}
+                    animate={{ scale: 2.5, opacity: 0 }} 
+                    transition={{ repeat: Infinity, duration: 2.4, ease: "easeOut" }}
+                  />
+                </div>
+
                 <div className="p-3 bg-orange-500/10 rounded-2xl border border-orange-500/30 text-orange-400 shrink-0">
                   <Radio className="w-5 h-5 animate-pulse" />
                 </div>
@@ -361,7 +451,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                   </p>
                   <span className="text-[9.5px] font-mono text-slate-550 block mt-2">DANGER MATRIX: ADM_EXPOSURE_CRIT</span>
                 </div>
-              </div>
+              </motion.div>
             </div>
           </div>
 
@@ -378,7 +468,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                 <Lock className="w-4 h-4 text-red-500" />
                 DANGER: SOURCE ACCIDENTAL CLEAR-VAL SECRETS
               </h3>
-              <span className="text-[10px] font-mono text-indigo-400 font-bold bg-indigo-950/40 border border-indigo-900/30 px-2 py-0.5 rounded-lg">
+              <span className="text-[10px] font-mono text-zinc-300 font-bold bg-white/5 border border-white/5 px-2 py-0.5 rounded-lg">
                 SCAN CONSECUTIVE: ACTIVE
               </span>
             </div>
@@ -434,7 +524,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
 
               {secrets.filter(s => s.status === 'active').length === 0 && (
                 <div className="text-center py-8 text-slate-550 space-y-2">
-                  <ShieldCheck className="w-12 h-12 text-emerald-500 mx-auto stroke-1" />
+                  <ShieldCheck className="w-12 h-12 text-zinc-400 mx-auto stroke-1" />
                   <p className="text-[11.5px] font-mono text-slate-500 max-w-sm mx-auto">
                     No active accidentally committed secret hashes detected inside code variables or local configurations!
                   </p>
@@ -458,7 +548,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                 <div key={provider.name} className="p-3 bg-[#080b0f] border border-slate-900 rounded-2xl flex items-center justify-between text-xs font-mono">
                   <div>
                     <span className="block font-bold text-slate-300">{provider.name}</span>
-                    <span className={`text-[9px] font-bold ${provider.status === 'ACTIVE' || provider.status === 'STABLE_ONLINE' ? 'text-[#00ffd1]' : 'text-slate-500'}`}>
+                    <span className={`text-[9px] font-bold ${provider.status === 'ACTIVE' || provider.status === 'STABLE_ONLINE' ? 'text-[#e4e4e7]' : 'text-slate-500'}`}>
                       {provider.status}
                     </span>
                   </div>
@@ -508,13 +598,13 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                         <div className="flex items-center gap-2">
                           <strong className="text-slate-200 text-xs font-mono">{vuln.pkg}</strong>
                           <span className={`text-[8.5px] font-bold font-mono px-1.5 py-0.5 rounded border uppercase ${
-                            vuln.severity === 'CRITICAL' ? 'text-red-400 border-red-500/20 bg-red-500/5' : vuln.severity === 'HIGH' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' : 'text-blue-400 border-blue-500/20 bg-blue-500/5'
+                            vuln.severity === 'CRITICAL' ? 'text-red-400 border-red-500/20 bg-red-500/5' : vuln.severity === 'HIGH' ? 'text-amber-500 border-amber-500/20 bg-amber-500/5' : 'text-zinc-300 border-white/10 bg-zinc-800'
                           }`}>
                             {vuln.severity} SEVERITY
                           </span>
                         </div>
                         <p className="text-[11px] text-slate-500 font-mono mt-1">
-                          Ref: <span className="text-indigo-400 font-black">{vuln.cve}</span> | Installed: <span className="text-rose-400">{vuln.installed}</span> → Available: <span className="text-emerald-400 font-bold">{vuln.latest}</span>
+                          Ref: <span className="text-zinc-300 font-black">{vuln.cve}</span> | Installed: <span className="text-rose-400">{vuln.installed}</span> → Available: <span className="text-zinc-300 font-bold">{vuln.latest}</span>
                         </p>
                         <p className="text-[10px] text-slate-450 mt-1">
                           License check: <span className="text-slate-350">{vuln.license}</span> | Supply Risk score: <span className="text-slate-350">{vuln.supplyRisk}</span>
@@ -551,7 +641,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                     <span className="text-[10px] text-slate-500">{license.count} dependencies referenced</span>
                   </div>
                   <span className={`text-[8.5px] font-bold px-1.5 py-0.5 rounded uppercase border ${
-                    license.status === 'COMPLIANT' ? 'text-emerald-450 border-emerald-900/30 bg-emerald-950/20' : 'text-amber-500 border-amber-900/30 bg-amber-950/20'
+                    license.status === 'COMPLIANT' ? 'text-violet-450 border-white/5 bg-white/5' : 'text-amber-500 border-amber-900/30 bg-amber-950/20'
                   }`}>
                     {license.status}
                   </span>
@@ -611,7 +701,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                       color: isSelected ? '#fff' : route.risk === 'HIGH' ? '#f59e0b' : '#94a3b8'
                     }}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${route.risk === 'HIGH' ? 'bg-red-500 animate-pulse' : 'bg-[#00ffd1]'}`}></span>
+                    <span className={`w-1.5 h-1.5 rounded-full ${route.risk === 'HIGH' ? 'bg-red-500 animate-pulse' : 'bg-[#e4e4e7]'}`}></span>
                     {route.method} {route.route}
                   </button>
                 );
@@ -645,11 +735,11 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                   </div>
                   <div className="flex justify-between border-b border-slate-900 pb-1.5">
                     <span className="text-slate-500 font-bold">RATE LIMIT STATE</span>
-                    <span className="text-[#00ffd1] font-bold">{selectedRoute.rateLimit}</span>
+                    <span className="text-[#e4e4e7] font-bold">{selectedRoute.rateLimit}</span>
                   </div>
                   <div className="flex justify-between pb-1.5">
                     <span className="text-slate-500 font-bold">HAZARD COEFFICIENT</span>
-                    <span className={`font-black ${selectedRoute.risk === 'HIGH' ? 'text-red-400' : 'text-[#00ffd1]'}`}>
+                    <span className={`font-black ${selectedRoute.risk === 'HIGH' ? 'text-red-400' : 'text-[#e4e4e7]'}`}>
                       {selectedRoute.risk} RISK
                     </span>
                   </div>
@@ -695,7 +785,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                 <div key={idx} className="p-4 bg-slate-950/60 border border-slate-900 rounded-2xl flex items-center justify-between gap-4">
                   <div className="flex items-center gap-3">
                     <div className={`p-2.5 rounded-xl border ${
-                      item.mfa ? 'bg-emerald-500/5 border-emerald-500/25 text-emerald-400' : 'bg-red-500/5 border-red-500/25 text-red-500 animate-pulse'
+                      item.mfa ? 'bg-zinc-800 border-white/10 text-zinc-300' : 'bg-red-500/5 border-red-500/25 text-red-500 animate-pulse'
                     }`}>
                       <UserCheck className="w-4 h-4" />
                     </div>
@@ -706,7 +796,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
                   </div>
 
                   <span className={`text-[8.5px] font-mono font-bold px-2 py-1 rounded border uppercase ${
-                    item.mfa ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-red-400 border-red-500/25 bg-red-500/5 animate-pulse'
+                    item.mfa ? 'text-zinc-300 border-white/10 bg-zinc-800' : 'text-red-400 border-red-500/25 bg-red-500/5 animate-pulse'
                   }`}>
                     {item.mfa ? 'MFA ACTIVE' : 'MFA MISSING'}
                   </span>
@@ -723,7 +813,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
             <div className="space-y-2 text-xs font-mono">
               <div className="p-3 bg-[#080b0f] border border-slate-900 rounded-xl flex justify-between items-center text-slate-400">
                 <span>jwt_auth_cookie</span>
-                <span className="text-[#00ffd1] font-bold">18 min remaining</span>
+                <span className="text-[#e4e4e7] font-bold">18 min remaining</span>
               </div>
               <div className="p-3 bg-[#080b0f] border border-slate-900 rounded-xl flex justify-between items-center text-slate-400">
                 <span>github_oauth_token</span>
@@ -802,7 +892,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
 
               <div className="p-3 bg-[#080b0f] border border-slate-900 rounded-2xl space-y-1">
                 <span className="text-[10px] font-mono text-slate-500 block font-bold">DDOS GUARD CAPACITY</span>
-                <span className="text-[#00ffd1] font-black text-xs block font-mono">AUTOMATED ADVANCED PROTECTION ACTIVE</span>
+                <span className="text-[#e4e4e7] font-black text-xs block font-mono">AUTOMATED ADVANCED PROTECTION ACTIVE</span>
               </div>
             </div>
           </div>
@@ -897,7 +987,7 @@ export default function SentinelSecurity({ onTriggerSound, onTriggerNotification
               <h5 className="text-xs font-bold text-slate-200 mt-0.5 font-sans block">{item.title}</h5>
               <div className="flex items-center justify-between text-xs font-mono pt-3 border-t border-slate-900">
                 <span className="text-slate-450">{item.value}</span>
-                <span className="text-[#00ffd1] font-extrabold">{item.status}</span>
+                <span className="text-[#e4e4e7] font-extrabold">{item.status}</span>
               </div>
             </div>
           ))}

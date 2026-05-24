@@ -139,7 +139,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
       case 'high': return '#ef4444'; // Red
       case 'medium': return '#f59e0b'; // Amber
       case 'low': return '#3b82f6'; // Blue
-      default: return '#00ffd1'; // Cyan / Teal
+      default: return '#e4e4e7'; // Cyan / Teal
     }
   };
 
@@ -147,22 +147,22 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
     switch (risk) {
       case 'high': return 'text-red-400 border-red-500/20 bg-red-500/5';
       case 'medium': return 'text-amber-400 border-amber-500/20 bg-amber-500/5';
-      case 'low': return 'text-blue-400 border-blue-500/20 bg-blue-500/5';
-      default: return 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5';
+      case 'low': return 'text-zinc-300 border-white/10 bg-zinc-800';
+      default: return 'text-zinc-300 border-white/10 bg-zinc-800';
     }
   };
 
   return (
-    <div id="d3-cognition-dependency-deck" className="bg-[#0b0d14]/80 border border-slate-800/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
+    <div id="d3-cognition-dependency-deck" className="bg-[#09090b]/80 border border-slate-800/80 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
       <div className="absolute inset-0 bg-grid-pattern opacity-[0.03]"></div>
       
       <div className="flex flex-col lg:flex-row lg:items-center justify-between pb-4 border-b border-slate-850/60 mb-5 gap-4 relative z-10">
         <div>
-          <span className="text-[9px] font-black uppercase tracking-widest text-[#00ffd1] font-mono block">
+          <span className="text-[9px] font-black uppercase tracking-widest text-[#e4e4e7] font-mono block">
             AI COGNITION BLUEPRINT DECK
           </span>
           <h4 className="text-sm font-bold text-slate-200 mt-0.5 font-sans flex items-center gap-1.5">
-            <Network className="w-4 h-4 text-[#00ffd1] animate-pulse" />
+            <Network className="w-4 h-4 text-[#e4e4e7] animate-pulse" />
             Topological Dependency Ring & Circular Hazards Chart
           </h4>
         </div>
@@ -174,7 +174,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
               onClick={() => { onTriggerSound(1.0); setActiveTab('graph'); }}
               className={`px-3 py-1.5 text-[10px] font-mono font-bold rounded-lg transition-all ${
                 activeTab === 'graph' 
-                  ? 'bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-extrabold' 
+                  ? 'bg-zinc-800 border border-white/10 text-zinc-300 font-extrabold' 
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -184,7 +184,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
               onClick={() => { onTriggerSound(1.0); setActiveTab('tabular'); }}
               className={`px-3 py-1.5 text-[10px] font-mono font-bold rounded-lg transition-all ${
                 activeTab === 'tabular' 
-                  ? 'bg-indigo-600/20 border border-indigo-500/30 text-indigo-400 font-extrabold' 
+                  ? 'bg-zinc-800 border border-white/10 text-zinc-300 font-extrabold' 
                   : 'text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -197,7 +197,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
             className="p-1.5 bg-slate-900 hover:bg-slate-850 border border-slate-800 text-slate-400 hover:white rounded-xl transition cursor-pointer flex items-center gap-1 text-[10px] font-mono font-bold uppercase shrink-0"
             title="Recalculate dynamic nodes repel"
           >
-            <RefreshCw className="w-3.5 h-3.5 text-[#00ffd1]" />
+            <RefreshCw className="w-3.5 h-3.5 text-[#e4e4e7]" />
             RE-LAYOUT
           </button>
         </div>
@@ -381,7 +381,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
             <div className="border-b border-white/5 pb-2.5 mb-4">
               <span className="text-[10px] font-mono uppercase text-slate-500 block font-bold">Inspection Node</span>
               <h5 className="text-xs font-bold text-white font-mono flex items-center gap-1.5 mt-0.5">
-                <Info className="w-3.5 h-3.5 text-[#00ffd1]" />
+                <Info className="w-3.5 h-3.5 text-[#e4e4e7]" />
                 Module Attributes
               </h5>
             </div>
@@ -412,11 +412,11 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
                   </div>
                   <div className="mt-1">
                     <span className="text-slate-500 block text-[9px] font-bold">IMPORTS (OUT)</span>
-                    <strong className="text-[#00ffd1] font-extrabold block text-xs mt-0.5">{selectedNode.importsCount} nodes</strong>
+                    <strong className="text-[#e4e4e7] font-extrabold block text-xs mt-0.5">{selectedNode.importsCount} nodes</strong>
                   </div>
                   <div className="mt-1">
                     <span className="text-slate-500 block text-[9px] font-bold">IMPORTED BY (IN)</span>
-                    <strong className="text-indigo-400 font-extrabold block text-xs mt-0.5">{selectedNode.importedByCount} roots</strong>
+                    <strong className="text-zinc-300 font-extrabold block text-xs mt-0.5">{selectedNode.importedByCount} roots</strong>
                   </div>
                 </div>
 
@@ -443,7 +443,7 @@ export default function D3DependencyGraph({ onTriggerSound, onTriggerNotificatio
           </div>
 
           <div className="p-3.5 bg-[#090b11]/80 rounded-2xl border border-slate-900 text-[10px] font-mono text-slate-500 flex items-start gap-2 relative overflow-hidden select-text">
-            <Sparkles className="w-4 h-4 text-[#00ffd1] shrink-0 mt-0.5" />
+            <Sparkles className="w-4 h-4 text-[#e4e4e7] shrink-0 mt-0.5" />
             <div>
               <span className="text-slate-400 font-black block text-[9.5px]">AUTOMATED REFACTOR HELPER</span>
               Resolving circular paths isolates dependencies, accelerating build speed by up to 45% in parallel pipelines.

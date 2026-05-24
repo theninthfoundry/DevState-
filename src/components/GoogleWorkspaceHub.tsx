@@ -523,14 +523,14 @@ export default function GoogleWorkspaceHub({
       {/* HEADER CONTROLS / AUTH WALL SECTION */}
       <div className="col-span-12 bg-[#090b11]/85 backdrop-blur-md border border-slate-800/80 p-5 rounded-3xl flex flex-col md:flex-row items-center justify-between gap-4 shadow-xl">
         <div className="flex items-center gap-3.5">
-          <div className="p-3 bg-violet-600/10 border border-violet-500/20 text-[#a78bfa] rounded-2xl">
-            <Sparkles className="w-5 h-5 text-violet-400" />
+          <div className="p-3 bg-zinc-800 border border-white/10 text-[#a78bfa] rounded-2xl">
+            <Sparkles className="w-5 h-5 text-zinc-300" />
           </div>
           <div className="text-left">
             <h3 className="text-sm font-black font-mono tracking-wide text-white uppercase flex items-center gap-2">
               Google Workspace Cloud Core
               {user && (
-                <span className="px-2 py-0.5 bg-emerald-500/10 border border-emerald-500/20 text-emerald-400 text-[9px] rounded-full font-bold">
+                <span className="px-2 py-0.5 bg-zinc-800 border border-white/10 text-zinc-300 text-[9px] rounded-full font-bold">
                   ACTIVE SYNC
                 </span>
               )}
@@ -544,15 +544,15 @@ export default function GoogleWorkspaceHub({
         <div>
           {authLoading ? (
             <div className="flex items-center gap-2 px-6 py-3 border border-slate-800 bg-[#10131d]/60 text-slate-400 rounded-2xl text-xs font-mono">
-              <Loader2 className="w-4 h-4 animate-spin text-violet-400" />
+              <Loader2 className="w-4 h-4 animate-spin text-zinc-300" />
               <span>Checking token cache...</span>
             </div>
           ) : user ? (
-            <div className="flex items-center gap-3 bg-[#111422] border border-violet-900/40 px-4 py-2 rounded-2.5xl shadow-inner">
+            <div className="flex items-center gap-3 bg-[#111422] border border-white/5 px-4 py-2 rounded-2.5xl shadow-inner">
               {user.photoURL ? (
-                <img src={user.photoURL} alt="Avatar" className="w-7 h-7 rounded-full border border-violet-500/30" referrerPolicy="no-referrer" />
+                <img src={user.photoURL} alt="Avatar" className="w-7 h-7 rounded-full border border-white/10" referrerPolicy="no-referrer" />
               ) : (
-                <div className="w-7 h-7 rounded-full bg-violet-900/60 border border-violet-500/30 text-xs flex items-center justify-center font-bold text-white uppercase">
+                <div className="w-7 h-7 rounded-full bg-white/10 border border-white/10 text-xs flex items-center justify-center font-bold text-white uppercase">
                   {(user.displayName || user.email || 'D').charAt(0)}
                 </div>
               )}
@@ -624,7 +624,7 @@ export default function GoogleWorkspaceHub({
                     <span className="hidden sm:inline-block">{tabItem.label}</span>
                   </div>
                   {tabItem.count > 0 && (
-                    <span className="px-2 py-0.5 bg-violet-600/20 border border-violet-500/30 text-violet-300 text-[9.5px] font-mono font-bold rounded-lg leading-tight shrink-0">
+                    <span className="px-2 py-0.5 bg-zinc-800 border border-white/10 text-zinc-200 text-[9.5px] font-mono font-bold rounded-lg leading-tight shrink-0">
                       {tabItem.count}
                     </span>
                   )}
@@ -650,7 +650,7 @@ export default function GoogleWorkspaceHub({
                     {activeWorkspaceTab === 'keep' && 'Keep Digital Scratchpad & Sync'}
                     
                     {apiLoading[activeWorkspaceTab] && (
-                      <Loader2 className="w-3.5 h-3.5 animate-spin text-violet-400" />
+                      <Loader2 className="w-3.5 h-3.5 animate-spin text-zinc-300" />
                     )}
                   </h4>
                   <p className="text-[11px] text-zinc-400 mt-1 leading-relaxed">
@@ -665,7 +665,7 @@ export default function GoogleWorkspaceHub({
                 <button
                   onClick={syncWorkspaceData}
                   type="button"
-                  className="p-2.5 bg-[#10131d] border border-slate-800 text-slate-400 hover:text-white hover:border-violet-500/30 rounded-xl transition cursor-pointer"
+                  className="p-2.5 bg-[#10131d] border border-slate-800 text-slate-400 hover:text-white hover:border-white/10 rounded-xl transition cursor-pointer"
                   title="Force telemetry sync"
                 >
                   <RefreshCw className="w-3.5 h-3.5" />
@@ -675,7 +675,7 @@ export default function GoogleWorkspaceHub({
               {/* Loader */}
               {apiLoading[activeWorkspaceTab] && (
                 <div className="flex-1 flex flex-col items-center justify-center p-12 text-slate-400 font-mono gap-3">
-                  <Loader2 className="w-8 h-8 animate-spin text-violet-500" />
+                  <Loader2 className="w-8 h-8 animate-spin text-zinc-400" />
                   <span className="text-xs">Connecting API tunnels & synchronizing data payloads...</span>
                 </div>
               )}
@@ -704,7 +704,7 @@ export default function GoogleWorkspaceHub({
                             {gmailMessages.map((msg) => (
                               <div 
                                 key={msg.id}
-                                className="p-3/5 bg-gradient-to-br from-[#0a0c14] to-[#0d0f1a] border border-slate-800/60 rounded-2xl hover:border-violet-500/30 transition shadow-md text-xs relative overflow-hidden"
+                                className="p-3/5 bg-gradient-to-br from-[#0a0c14] to-[#0d0f1a] border border-slate-800/60 rounded-2xl hover:border-white/10 transition shadow-md text-xs relative overflow-hidden"
                               >
                                 <div className="flex justify-between items-start gap-2 mb-1.5">
                                   <span className="font-extrabold text-slate-200 block truncate max-w-[140px]">{msg.from}</span>
@@ -720,7 +720,7 @@ export default function GoogleWorkspaceHub({
 
                       {/* Right: Compose & Send */}
                       <div className="bg-[#0b0c14] border border-slate-800/60 p-4.5 rounded-2.5xl shadow-inner text-xs h-fit">
-                        <span className="text-[9px] font-mono tracking-widest text-violet-400 block font-extrabold uppercase mb-3.5">
+                        <span className="text-[9px] font-mono tracking-widest text-zinc-300 block font-extrabold uppercase mb-3.5">
                           DISPATCH MAIL VECTOR
                         </span>
                         
@@ -731,7 +731,7 @@ export default function GoogleWorkspaceHub({
                               type="email" 
                               required
                               placeholder="client@workspace.com" 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10"
                               value={newEmail.to}
                               onChange={e => setNewEmail({ ...newEmail, to: e.target.value })}
                             />
@@ -743,7 +743,7 @@ export default function GoogleWorkspaceHub({
                               type="text" 
                               required
                               placeholder="Project Delivery Sync update" 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10"
                               value={newEmail.subject}
                               onChange={e => setNewEmail({ ...newEmail, subject: e.target.value })}
                             />
@@ -754,7 +754,7 @@ export default function GoogleWorkspaceHub({
                             <textarea
                               rows={3.5}
                               placeholder="Workspace status has successfully aligned..." 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500 font-mono"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10 font-mono"
                               value={newEmail.body}
                               onChange={e => setNewEmail({ ...newEmail, body: e.target.value })}
                             />
@@ -762,7 +762,7 @@ export default function GoogleWorkspaceHub({
 
                           <button
                             type="submit"
-                            className="w-full py-2.5 bg-violet-600 hover:bg-violet-500 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-violet-500/10"
+                            className="w-full py-2.5 bg-zinc-800 hover:bg-zinc-800 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg shadow-black/50"
                           >
                             <Send className="w-3.5 h-3.5" />
                             <span>DISPATCH EMAIL</span>
@@ -796,7 +796,7 @@ export default function GoogleWorkspaceHub({
                               >
                                 <div className="text-left">
                                   <h5 className="font-extrabold text-slate-100 flex items-center gap-1.5 leading-snug">
-                                    <Clock className="w-3.5 h-3.5 text-indigo-400 shrink-0" />
+                                    <Clock className="w-3.5 h-3.5 text-zinc-300 shrink-0" />
                                     <span>{evt.summary}</span>
                                   </h5>
                                   <p className="text-[10.5px] font-mono text-zinc-400 mt-1 leading-snug">
@@ -836,7 +836,7 @@ export default function GoogleWorkspaceHub({
 
                       {/* Right: Log new deliverables */}
                       <div className="bg-[#0b0c14] border border-slate-800/60 p-4.5 rounded-2.5xl shadow-inner text-xs h-fit">
-                        <span className="text-[9px] font-mono tracking-widest text-violet-400 block font-extrabold uppercase mb-3.5">
+                        <span className="text-[9px] font-mono tracking-widest text-zinc-300 block font-extrabold uppercase mb-3.5">
                           SCHEDULE NEW DELIVERABLE
                         </span>
                         
@@ -847,7 +847,7 @@ export default function GoogleWorkspaceHub({
                               type="text" 
                               required
                               placeholder="HUD Alignment Audit check" 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10"
                               value={newEvent.summary}
                               onChange={e => setNewEvent({ ...newEvent, summary: e.target.value })}
                             />
@@ -858,7 +858,7 @@ export default function GoogleWorkspaceHub({
                             <input 
                               type="text" 
                               placeholder="Analyze secure compiler telemetry & dependencies" 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10"
                               value={newEvent.description}
                               onChange={e => setNewEvent({ ...newEvent, description: e.target.value })}
                             />
@@ -870,7 +870,7 @@ export default function GoogleWorkspaceHub({
                               <input 
                                 type="datetime-local" 
                                 required
-                                className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500"
+                                className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-300 focus:outline-none focus:border-white/10"
                                 value={newEvent.start}
                                 onChange={e => setNewEvent({ ...newEvent, start: e.target.value })}
                               />
@@ -879,7 +879,7 @@ export default function GoogleWorkspaceHub({
                               <label className="text-[9.5px] text-slate-400 font-sans font-bold uppercase block">End Date/Time</label>
                               <input 
                                 type="datetime-local" 
-                                className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-300 focus:outline-none focus:border-violet-500"
+                                className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-2 py-2 text-xs text-slate-300 focus:outline-none focus:border-white/10"
                                 value={newEvent.end}
                                 onChange={e => setNewEvent({ ...newEvent, end: e.target.value })}
                               />
@@ -888,7 +888,7 @@ export default function GoogleWorkspaceHub({
 
                           <button
                             type="submit"
-                            className="w-full py-2.5 bg-[#4f46e5] hover:bg-violet-600 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg"
+                            className="w-full py-2.5 bg-[#4f46e5] hover:bg-zinc-800 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-2 cursor-pointer shadow-lg"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>LOG TO CALENDAR</span>
@@ -919,7 +919,7 @@ export default function GoogleWorkspaceHub({
                                 type="button"
                                 className={`w-full px-3 py-2.5 rounded-xl border text-left text-xs transition duration-150 block truncate cursor-pointer ${
                                   activeTaskListId === list.id
-                                    ? 'bg-violet-950/30 border-violet-800 text-slate-100 font-bold'
+                                    ? 'bg-white/5 border-white/5 text-slate-100 font-bold'
                                     : 'bg-transparent border-transparent text-slate-400 hover:text-white hover:bg-white/5'
                                 }`}
                               >
@@ -944,13 +944,13 @@ export default function GoogleWorkspaceHub({
                             type="text" 
                             required
                             placeholder="Add a synchronization check milestone..." 
-                            className="bg-[#07080c] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-violet-500 flex-1"
+                            className="bg-[#07080c] border border-slate-800 rounded-xl px-3.5 py-2.5 text-xs text-slate-200 focus:outline-none focus:border-white/10 flex-1"
                             value={newTaskTitle}
                             onChange={e => setNewTaskTitle(e.target.value)}
                           />
                           <button
                             type="submit"
-                            className="px-4 py-2 bg-violet-600 hover:bg-violet-500 text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md shrink-0"
+                            className="px-4 py-2 bg-zinc-800 hover:bg-zinc-800 text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md shrink-0"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span className="hidden sm:inline">ADD</span>
@@ -972,7 +972,7 @@ export default function GoogleWorkspaceHub({
                                   className={`p-3.5 bg-[#0a0c14]/75 border rounded-2xl flex items-center justify-between gap-4 transition shadow-sm ${
                                     isComplete 
                                       ? 'border-[#15803d]/20 bg-[#162a1b]/10' 
-                                      : 'border-slate-800 hover:border-violet-500/20'
+                                      : 'border-slate-800 hover:border-white/10'
                                   }`}
                                 >
                                   <div className="flex items-center gap-3 text-left">
@@ -981,8 +981,8 @@ export default function GoogleWorkspaceHub({
                                       type="button"
                                       className={`w-5 h-5 rounded-lg border transition flex items-center justify-center cursor-pointer ${
                                         isComplete 
-                                          ? 'bg-emerald-600 border-emerald-500 text-white' 
-                                          : 'bg-[#05060a] border-slate-700 hover:border-violet-500 text-transparent'
+                                          ? 'bg-zinc-800 border-white/10 text-white' 
+                                          : 'bg-[#05060a] border-slate-700 hover:border-white/10 text-transparent'
                                       }`}
                                     >
                                       <Check className="w-3.5 h-3.5" />
@@ -1028,7 +1028,7 @@ export default function GoogleWorkspaceHub({
                         <div className="space-y-2">
                           <button
                             type="button"
-                            className="w-full px-3 py-2.5 bg-violet-950/30 border border-violet-800 text-slate-100 font-bold rounded-xl text-left block text-xs"
+                            className="w-full px-3 py-2.5 bg-white/5 border border-white/5 text-slate-100 font-bold rounded-xl text-left block text-xs"
                           >
                             💬 HUD Telemetry Canal
                           </button>
@@ -1040,7 +1040,7 @@ export default function GoogleWorkspaceHub({
                               type="button"
                               className={`w-full px-3 py-2.5 rounded-xl border text-left text-xs transition duration-150 block truncate cursor-pointer ${
                                 activeSpaceName === space.name
-                                  ? 'bg-violet-950/30 border-violet-800 text-slate-100 font-bold'
+                                  ? 'bg-white/5 border-white/5 text-slate-100 font-bold'
                                   : 'bg-transparent border-transparent text-slate-400 hover:text-white hover:bg-white/5'
                               }`}
                             >
@@ -1049,8 +1049,8 @@ export default function GoogleWorkspaceHub({
                           ))}
                         </div>
 
-                        <div className="p-3 bg-indigo-950/25 border border-indigo-900/40 rounded-2xl text-[10px] text-zinc-400 leading-normal flex gap-2">
-                          <AlertCircle className="w-4 h-4 text-indigo-400 shrink-0" />
+                        <div className="p-3 bg-white/5 border border-white/5 rounded-2xl text-[10px] text-zinc-400 leading-normal flex gap-2">
+                          <AlertCircle className="w-4 h-4 text-zinc-300 shrink-0" />
                           <span>Google Chat is loaded on the developer stream fallback engine for real-time local HUD collaboration.</span>
                         </div>
                       </div>
@@ -1084,13 +1084,13 @@ export default function GoogleWorkspaceHub({
                             type="text"
                             required
                             placeholder="Write developers dispatch..." 
-                            className="bg-[#0b0c13] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500 flex-1"
+                            className="bg-[#0b0c13] border border-slate-800 rounded-xl px-3.5 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10 flex-1"
                             value={newChatMessage}
                             onChange={e => setNewChatMessage(e.target.value)}
                           />
                           <button
                             type="submit"
-                            className="p-2.5 bg-violet-605 hover:bg-violet-505 bg-violet-600 hover:bg-violet-500 text-white rounded-xl transition shadow-md cursor-pointer"
+                            className="p-2.5 bg-violet-605 hover:bg-violet-505 bg-zinc-800 hover:bg-zinc-800 text-white rounded-xl transition shadow-md cursor-pointer"
                             title="Send dispatch"
                           >
                             <Send className="w-4 h-4" />
@@ -1116,7 +1116,7 @@ export default function GoogleWorkspaceHub({
                             <input 
                               type="text" 
                               placeholder="Fix critical build bugs" 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500 font-semibold"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10 font-semibold"
                               value={newNote.title}
                               onChange={e => setNewNote({ ...newNote, title: e.target.value })}
                             />
@@ -1127,7 +1127,7 @@ export default function GoogleWorkspaceHub({
                             <textarea
                               rows={3}
                               placeholder="Upgrade tsx and resolve modularity splits..." 
-                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-violet-500 font-mono"
+                              className="w-full bg-[#07080c] border border-slate-800 rounded-xl px-3 py-2 text-xs text-slate-200 focus:outline-none focus:border-white/10 font-mono"
                               value={newNote.content}
                               onChange={e => setNewNote({ ...newNote, content: e.target.value })}
                             />
@@ -1158,7 +1158,7 @@ export default function GoogleWorkspaceHub({
 
                           <button
                             type="submit"
-                            className="w-full py-2 bg-violet-600 hover:bg-violet-500 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
+                            className="w-full py-2 bg-zinc-800 hover:bg-zinc-800 transition text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 cursor-pointer shadow-md"
                           >
                             <Plus className="w-3.5 h-3.5" />
                             <span>JOT MEMO</span>
@@ -1190,7 +1190,7 @@ export default function GoogleWorkspaceHub({
                                     <div className="flex gap-1">
                                       <button
                                         onClick={() => handleTogglePinNote(note.id)}
-                                        className={`p-1 rounded-md transition ${note.isPinned ? 'text-violet-400' : 'text-slate-500 hover:text-white'}`}
+                                        className={`p-1 rounded-md transition ${note.isPinned ? 'text-zinc-300' : 'text-slate-500 hover:text-white'}`}
                                         title="Pin sticky note"
                                       >
                                         <Pin className={`w-3.5 h-3.5 ${note.isPinned ? 'fill-current' : ''}`} />
@@ -1227,8 +1227,8 @@ export default function GoogleWorkspaceHub({
         </>
       ) : (
         /* WALLED PROMPT SCREEN */
-        <div className="col-span-12 bg-[#0b0d14]/75 border border-slate-800/80 rounded-3xl p-10 shadow-xl max-w-3xl mx-auto my-4 text-center space-y-6">
-          <div className="p-5 rounded-full bg-gradient-to-br from-[#8b5cf6]/10 to-indigo-600/15 border border-indigo-500/20 text-[#a78bfa] w-fit mx-auto animate-pulse">
+        <div className="col-span-12 bg-[#09090b]/75 border border-slate-800/80 rounded-3xl p-10 shadow-xl max-w-3xl mx-auto my-4 text-center space-y-6">
+          <div className="p-5 rounded-full bg-gradient-to-br from-[#d4d4d8]/10 to-zinc-900/15 border border-white/10 text-[#a78bfa] w-fit mx-auto animate-pulse">
             <Lock className="w-12 h-12" />
           </div>
           

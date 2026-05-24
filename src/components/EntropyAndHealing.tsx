@@ -283,7 +283,7 @@ export default function EntropyAndHealing() {
                             </td>
                             <td className="py-3.5 text-right">
                               {isResolved ? (
-                                <span className="text-emerald-500 font-extrabold text-[10px] flex items-center justify-end gap-1 font-mono">
+                                <span className="text-zinc-400 font-extrabold text-[10px] flex items-center justify-end gap-1 font-mono">
                                   <Check className="w-3.5 h-3.5" /> Pruned Clean
                                 </span>
                               ) : route.actionable ? (
@@ -307,7 +307,7 @@ export default function EntropyAndHealing() {
             </div>
 
             {/* Duplicated code warnings card */}
-            <div className="bg-[#0b0d14]/70 border border-slate-900 rounded-3xl p-5">
+            <div className="bg-[#09090b]/70 border border-slate-900 rounded-3xl p-5">
               <div className="flex items-center gap-2 mb-3 select-none">
                 <AlertTriangle className="w-4 h-4 text-amber-500 animate-pulse" />
                 <span className="text-[10px] font-mono font-bold uppercase text-slate-450 block">AST Redundancy Warnings</span>
@@ -439,25 +439,25 @@ export default function EntropyAndHealing() {
               <div className="flex-1 bg-slate-955 border border-slate-90 w-full rounded-2xl overflow-hidden space-y-5 animate-fade-in">
                 
                 {/* Banner Status */}
-                <div className="p-4 bg-emerald-950/30 border-b border-emerald-900/30 flex items-center justify-between">
+                <div className="p-4 bg-white/5 border-b border-white/5 flex items-center justify-between">
                   <div className="flex items-center gap-2.5">
-                    <span className="p-1.5 bg-emerald-500/10 rounded-lg text-emerald-400 select-none">
+                    <span className="p-1.5 bg-zinc-800 rounded-lg text-zinc-300 select-none">
                       <Check className="w-4 h-4 animate-bounce" />
                     </span>
-                    <div className="font-mono text-xs text-emerald-400">
+                    <div className="font-mono text-xs text-zinc-300">
                       <span className="font-black uppercase">REPAIR SEQUENCE SUCCESSFUL</span>
                       <span className="text-[9px] text-slate-500 block mt-0.5">AST compiler checking fully synchronized</span>
                     </div>
                   </div>
 
                   {prCreated ? (
-                    <span className="text-indigo-400 font-bold text-[10px] font-mono bg-indigo-950/30 border border-indigo-900/30 px-3 py-1 rounded-xl flex items-center gap-1">
+                    <span className="text-zinc-300 font-bold text-[10px] font-mono bg-white/5 border border-white/5 px-3 py-1 rounded-xl flex items-center gap-1">
                       <GitBranch className="w-3.5 h-3.5" /> Pull Request #42 Created
                     </span>
                   ) : (
                     <button
                       onClick={() => setPrCreated(true)}
-                      className="px-3.5 py-1.5 bg-violet-600 hover:bg-violet-700 text-white rounded-2xl text-[10px] font-bold font-mono cursor-pointer active:scale-95 transition flex items-center gap-1 shadow-lg shadow-violet-950/30"
+                      className="px-3.5 py-1.5 bg-zinc-800 hover:bg-violet-700 text-white rounded-2xl text-[10px] font-bold font-mono cursor-pointer active:scale-95 transition flex items-center gap-1 shadow-lg shadow-violet-950/30"
                     >
                       <GitBranch className="w-3 h-3" /> Push AI Healing PR
                     </button>
@@ -480,11 +480,11 @@ export default function EntropyAndHealing() {
                     </div>
 
                     {/* After block */}
-                    <div className="rounded-2xl border border-emerald-950/40 bg-[#000a03]/40 p-4.5 space-y-2.5">
-                      <span className="text-[10px] font-mono font-bold text-emerald-500 bg-emerald-950/30 border border-emerald-900/40 px-2 py-0.5 rounded-full select-none inline-block">
+                    <div className="rounded-2xl border border-violet-950/40 bg-[#000a03]/40 p-4.5 space-y-2.5">
+                      <span className="text-[10px] font-mono font-bold text-zinc-400 bg-white/5 border border-white/5 px-2 py-0.5 rounded-full select-none inline-block">
                         + Clean Optimized File Context
                       </span>
-                      <pre className="font-mono text-[10px] text-emerald-300 leading-normal overflow-x-auto select-text whitespace-pre-wrap max-h-56">
+                      <pre className="font-mono text-[10px] text-zinc-200 leading-normal overflow-x-auto select-text whitespace-pre-wrap max-h-56">
                         {selectedRepair.diff.new}
                       </pre>
                     </div>

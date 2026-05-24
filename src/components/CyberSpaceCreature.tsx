@@ -145,7 +145,7 @@ export default function CyberSpaceCreature() {
         length: numSegments * segLength,
         angleSpeed: 0.015 + Math.random() * 0.02,
         baseAngle: angle,
-        color: ecoStyle === 'amethyst' ? '#c084fc' : ecoStyle === 'cyber' ? '#8b5cf6' : '#a1a1aa'
+        color: ecoStyle === 'amethyst' ? '#c084fc' : ecoStyle === 'cyber' ? '#d4d4d8' : '#a1a1aa'
       });
     }
 
@@ -480,7 +480,7 @@ export default function CyberSpaceCreature() {
           {/* Quick instructions HUD inside vector */}
           <div className="absolute top-4 left-4 pointer-events-none select-none">
             <div className="flex items-center gap-1.5 text-[9.5px] font-mono font-black text-white/55 uppercase bg-black/60 backdrop-blur-md px-3 py-1.5 rounded-full border border-white/5">
-              <Feather className="w-3 h-3 text-violet-400 animate-pulse" />
+              <Feather className="w-3 h-3 text-zinc-300 animate-pulse" />
               <span>Click surface to direct nucleus energy orbs</span>
             </div>
           </div>
@@ -515,7 +515,7 @@ export default function CyberSpaceCreature() {
           <div className="p-3.5 bg-[#030304]/60 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 font-bold mb-2">
               <span className="flex items-center gap-1.5">
-                <Wind className="w-3.5 h-3.5 text-violet-400" />
+                <Wind className="w-3.5 h-3.5 text-zinc-300" />
                 SWAY REGULAR AGILITY
               </span>
               <span className="text-white">{agility}%</span>
@@ -533,7 +533,7 @@ export default function CyberSpaceCreature() {
           <div className="p-3.5 bg-[#030304]/60 rounded-2xl border border-white/5 flex flex-col justify-between">
             <div className="flex items-center justify-between text-[11px] font-mono text-zinc-400 font-bold mb-2">
               <span className="flex items-center gap-1.5">
-                <Zap className="w-3.5 h-3.5 text-violet-400 animate-pulse" />
+                <Zap className="w-3.5 h-3.5 text-zinc-300 animate-pulse" />
                 BIOLUMINESCENT INTENSITY
               </span>
               <span className="text-white">{bioPower}%</span>
@@ -557,16 +557,16 @@ export default function CyberSpaceCreature() {
             <button
               type="button"
               onClick={handleFeedCreature}
-              className="py-2 px-3 rounded-xl border border-white/10 hover:border-[#8b5cf6] bg-black text-white hover:bg-[#8b5cf6]/10 cursor-pointer active:scale-95 transition flex items-center justify-center gap-1.5"
+              className="py-2 px-3 rounded-xl border border-white/10 hover:border-[#d4d4d8] bg-black text-white hover:bg-[#d4d4d8]/10 cursor-pointer active:scale-95 transition flex items-center justify-center gap-1.5"
             >
-              <Feather className="w-3.5 h-3.5 text-violet-400" />
+              <Feather className="w-3.5 h-3.5 text-zinc-300" />
               NUTRATE MATRX
             </button>
 
             <button
               type="button"
               onClick={handleBurstSound}
-              className="py-2 px-3 rounded-xl bg-violet-605 text-white bg-violet-700 hover:bg-violet-600 transition cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
+              className="py-2 px-3 rounded-xl bg-violet-605 text-white bg-violet-700 hover:bg-zinc-800 transition cursor-pointer active:scale-95 flex items-center justify-center gap-1.5"
             >
               <Flame className="w-3.5 h-3.5 animate-pulse" />
               BURST RADIUS
@@ -581,7 +581,7 @@ export default function CyberSpaceCreature() {
               <button
                 type="button"
                 onClick={() => { setEcoStyle('amethyst'); playSynthesizerFeedTone(440, 'sine'); }}
-                className={`text-[9px] px-2.5 py-1 rounded-lg font-mono font-bold cursor-pointer transition ${ecoStyle === 'amethyst' ? 'bg-violet-950 text-[#c084fc] border border-violet-900/30' : 'text-zinc-500 hover:text-white'}`}
+                className={`text-[9px] px-2.5 py-1 rounded-lg font-mono font-bold cursor-pointer transition ${ecoStyle === 'amethyst' ? 'bg-white/5 text-[#c084fc] border border-white/5' : 'text-zinc-500 hover:text-white'}`}
               >
                 Amethyst
               </button>

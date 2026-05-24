@@ -1,0 +1,1 @@
+Build a production-grade DevState Workspace Tracker featuring full-stack file indexers, real-time alignment metric indicators, simulated command logs, and context recovery.

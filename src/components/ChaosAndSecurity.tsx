@@ -129,7 +129,7 @@ export default function ChaosAndSecurity() {
       {/* Header */}
       <div className="flex flex-col md:flex-row md:items-center justify-between gap-3 border-b border-slate-900 pb-5">
         <div>
-          <span className="text-[10px] font-mono font-black text-violet-400 bg-violet-950/20 border border-violet-900/40 px-2.5 py-1 rounded-md tracking-wider uppercase">
+          <span className="text-[10px] font-mono font-black text-zinc-300 bg-white/5 border border-white/5 px-2.5 py-1 rounded-md tracking-wider uppercase">
             Chaos Lab & Cyber Security
           </span>
           <h2 className="text-xl font-bold tracking-tight text-white mt-2">
@@ -182,7 +182,7 @@ export default function ChaosAndSecurity() {
             {/* Grid display representing service nodes */}
             <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
               {channels.map((ch) => {
-                let statusColor = 'text-emerald-400 bg-emerald-950/15';
+                let statusColor = 'text-zinc-300 bg-white/5';
                 let cardBorder = 'border-slate-900';
                 if (ch.status === 'affected') {
                   statusColor = 'text-amber-500 bg-amber-955/20 border-amber-900/30';
@@ -205,11 +205,11 @@ export default function ChaosAndSecurity() {
                       </div>
 
                       {ch.icon === 'database' ? (
-                        <Database className="w-4 h-4 text-teal-400" />
+                        <Database className="w-4 h-4 text-zinc-300" />
                       ) : ch.icon === 'ws' ? (
-                        <Send className="w-4.5 h-4.5 text-indigo-400" />
+                        <Send className="w-4.5 h-4.5 text-zinc-300" />
                       ) : ch.icon === 'cpu' ? (
-                        <Cpu className="w-4.5 h-4.5 text-violet-400" />
+                        <Cpu className="w-4.5 h-4.5 text-zinc-300" />
                       ) : (
                         <Globe className="w-4.5 h-4.5 text-cyan-400" />
                       )}
@@ -250,7 +250,7 @@ export default function ChaosAndSecurity() {
                       ) : (
                         <button
                           onClick={() => triggerChaosOutage(ch.name, 'latency')}
-                          className="flex-1 py-1 bg-indigo-950/20 text-indigo-400 border border-indigo-900/20 hover:bg-indigo-900/30 rounded-lg text-[8.5px] font-black transition cursor-pointer"
+                          className="flex-1 py-1 bg-white/5 text-zinc-300 border border-white/5 hover:bg-white/10 rounded-lg text-[8.5px] font-black transition cursor-pointer"
                         >
                           Latency Spike
                         </button>
@@ -282,7 +282,7 @@ export default function ChaosAndSecurity() {
 
             <div className="bg-[#0b0c15] p-3 border border-slate-900 rounded-2xl mt-4 select-text">
               <span className="text-[10px] font-mono text-white flex items-center gap-1.5 font-bold">
-                <Info className="w-3.5 h-3.5 text-violet-400" />
+                <Info className="w-3.5 h-3.5 text-zinc-300" />
                 Autonomous Resilience:
               </span>
               <p className="text-[10.5px] text-slate-450 leading-relaxed font-sans font-medium mt-1">
@@ -304,13 +304,13 @@ export default function ChaosAndSecurity() {
 
             <div className="space-y-3.5">
               {threats.map((thr) => (
-                <div key={thr.vector} className={`p-4.5 bg-[#07090e]/85 rounded-2xl border ${thr.fixed ? 'border-emerald-950 bg-[#000a02]/10' : 'border-slate-900'} flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 relative`}>
+                <div key={thr.vector} className={`p-4.5 bg-[#07090e]/85 rounded-2xl border ${thr.fixed ? 'border-violet-950 bg-[#000a02]/10' : 'border-slate-900'} flex flex-col md:flex-row md:items-center justify-between gap-4 transition-all duration-300 relative`}>
                   
                   <div className="space-y-2">
                     <div className="flex flex-wrap items-center gap-2">
                       <span className={`text-[8px] font-mono uppercase px-2 py-0.5 rounded-full font-black ${
                         thr.fixed 
-                          ? 'bg-emerald-950/30 text-emerald-400' 
+                          ? 'bg-white/5 text-zinc-300' 
                           : thr.severity === 'high' 
                             ? 'bg-rose-950/30 text-rose-450 border border-rose-900/20' 
                             : 'bg-amber-955/35 text-amber-500 border border-amber-900/20'
@@ -329,7 +329,7 @@ export default function ChaosAndSecurity() {
                   {/* Patching buttons */}
                   <div className="shrink-0 text-right">
                     {thr.fixed ? (
-                      <span className="text-emerald-500 font-extrabold text-[10.5px] flex items-center justify-end gap-1 font-mono">
+                      <span className="text-zinc-400 font-extrabold text-[10.5px] flex items-center justify-end gap-1 font-mono">
                         <ShieldCheck className="w-4 h-4 animate-bounce" /> Patched Mapped
                       </span>
                     ) : thr.actionable ? (
@@ -364,7 +364,7 @@ export default function ChaosAndSecurity() {
                     let tileColor = 'bg-slate-900 border border-slate-850';
                     if (i === 2 || i === 7) tileColor = 'bg-rose-650 border border-rose-900 animate-pulse';
                     if (i === 12) tileColor = 'bg-amber-600 border border-amber-900 animate-pulse';
-                    if (i < 5 && i !== 2) tileColor = 'bg-emerald-950 border border-emerald-900';
+                    if (i < 5 && i !== 2) tileColor = 'bg-white/5 border border-white/5';
                     return (
                       <div 
                         key={i} 
@@ -386,7 +386,7 @@ export default function ChaosAndSecurity() {
 
             <div className="bg-[#0b0c15] p-3.5 border border-slate-900 rounded-2xl mt-4 select-text">
               <span className="text-[10.5px] font-mono text-white flex items-center gap-1.5 font-bold">
-                <KeyRound className="w-4 h-4 text-violet-400" />
+                <KeyRound className="w-4 h-4 text-zinc-300" />
                 Hardening Active Patches:
               </span>
               <p className="text-[10.5px] text-slate-450 leading-relaxed font-sans font-medium mt-1">

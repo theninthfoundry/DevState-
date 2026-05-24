@@ -24,6 +24,70 @@ interface ApiEndpoint {
   regions: string[];
 }
 
+function EcgWaveform({ status, p95 }: { status: 'HEALTHY' | 'DEGRADED' | 'DOWN'; p95: string }) {
+  const pathRef = React.useRef<SVGPathElement>(null);
+
+  useEffect(() => {
+    let animId: number;
+    let t = 0;
+    const p95Num = parseInt(p95) || 100;
+
+    const update = () => {
+      t += 1.5;
+      const pathEl = pathRef.current;
+      if (!pathEl) return;
+
+      const points: string[] = [];
+      // Cycle period L influenced by p95 latency:
+      const L = Math.max(50, Math.min(180, 70 + p95Num * 0.08));
+      const speed = status === 'DEGRADED' ? 1.0 : 1.2;
+
+      for (let x = 0; x <= 300; x += 2) {
+        let y = 15; // Vertical scale baseline at 15
+
+        if (status === 'DOWN') {
+          y += Math.sin(x * 0.8 + t * 0.15) * 0.4 + Math.sin(x * 2.1 + t) * 0.2;
+        } else {
+          const localT = (x + t * speed) % L;
+
+          if (localT >= 5 && localT < 12) {
+            y -= 2.5 * Math.sin(((localT - 5) / 7) * Math.PI);
+          } else if (localT >= 15 && localT < 18) {
+            y += 1.5 * Math.sin(((localT - 15) / 3) * Math.PI);
+          } else if (localT >= 18 && localT < 23) {
+            const spikeHeight = Math.max(10, Math.min(22, 24 - p95Num * 0.012));
+            y -= spikeHeight * Math.sin(((localT - 18) / 5) * Math.PI);
+          } else if (localT >= 23 && localT < 27) {
+            y += 5 * Math.sin(((localT - 23) / 4) * Math.PI);
+          } else if (localT >= 32 && localT < 45) {
+            y -= 4 * Math.sin(((localT - 32) / 13) * Math.PI);
+          }
+
+          if (status === 'DEGRADED') {
+            y += Math.sin(x * 0.9 + t * 0.4) * 1.5 + Math.sin(x * 2.5) * 0.8 + (Math.random() - 0.5) * 0.6;
+          } else {
+            y += Math.sin(x * 1.8 + t * 0.3) * 0.15;
+          }
+        }
+
+        points.push(`${x === 0 ? 'M' : 'L'} ${x} ${y.toFixed(2)}`);
+      }
+
+      pathEl.setAttribute('d', points.join(' '));
+      animId = requestAnimationFrame(update);
+    };
+
+    animId = requestAnimationFrame(update);
+    return () => cancelAnimationFrame(animId);
+  }, [status, p95]);
+
+  return (
+    <svg viewBox="0 0 300 30" className="w-full h-full fill-none stroke-[1.8]">
+      <path ref={pathRef} className="transition-all duration-300" />
+    </svg>
+  );
+}
+
 export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification }: PulseApiGuardianProps) {
   const [activeTab, setActiveTab] = useState<'registry' | 'workbench' | 'contracts' | 'mocking' | 'webhooks' | 'performance' | 'docs'>('registry');
   const [searchTerm, setSearchTerm] = useState('');
@@ -128,18 +192,8 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
     }, 1000);
   };
 
-  const getEcgWaveformPath = (status: 'HEALTHY' | 'DEGRADED' | 'DOWN', speedOffset: number = 0) => {
-    if (status === 'DOWN') {
-      // Flatline representation with subtle electrical variance noise
-      return `M 0 15 L 30 15 L 60 14 L 90 15 L 120 15 L 150 15 L 180 15 L 210 14 L 240 15 L 270 15 L 300 15`;
-    }
-    if (status === 'DEGRADED') {
-      // Irregular, chaotic intervals
-      return `M 0 15 L 30 15 L 45 5 L 53 28 L 60 15 L 90 15 L 105 8 L 115 25 L 122 15 L 150 14 L 165 -5 L 175 32 L 185 15 L 210 15 L 240 15 L 270 10 L 285 24 L 300 15`;
-    }
-    // High-resolution biometrically stable rhythmic ECG sweep
-    return `M 0 15 L 45 15 L 60 2 L 68 28 L 75 15 L 110 15 L 125 15 L 138 2 L 145 28 L 153 15 L 210 15 L 225 15 L 238 2 L 245 28 L 253 15 L 300 15`;
-  };
+  // Realtime high-performance dynamic generator replaces previous static SVG path calculation
+  const dummyPlaceholderStaticReplacement = () => {};
 
   // Helper snippet generator
   const getSimulatedCode = (lang: 'curl' | 'js' | 'python') => {
@@ -156,17 +210,17 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
     <div id="pulse-api-guardian-module" className="space-y-6 text-slate-100 select-text">
       
       {/* HEADER BAR HERO BANNER */}
-      <div className="bg-[#0b0d14]/80 backdrop-blur-md border border-emerald-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
-        <div className="absolute top-0 right-0 w-80 h-80 bg-emerald-500/5 rounded-full filter blur-2xl pointer-events-none animate-pulse"></div>
+      <div className="bg-[#09090b]/80 backdrop-blur-md border border-violet-950/40 p-6 rounded-3xl relative overflow-hidden flex flex-col md:flex-row md:items-center justify-between gap-6">
+        <div className="absolute top-0 right-0 w-80 h-80 bg-zinc-800 rounded-full filter blur-2xl pointer-events-none animate-pulse"></div>
         <div className="relative z-10">
           <div className="flex items-center gap-2">
-            <Heart className="w-4 h-4 text-emerald-500 animate-pulse shrink-0" />
-            <span className="text-[10px] font-black uppercase tracking-widest text-emerald-400 font-mono">
+            <Heart className="w-4 h-4 text-zinc-400 animate-pulse shrink-0" />
+            <span className="text-[10px] font-black uppercase tracking-widest text-zinc-300 font-mono">
               BIOMETRIC WEB VITAL SIGNAL OPERATIONS
             </span>
           </div>
           <h2 className="text-xl font-bold tracking-tight text-white mt-1.5 flex items-center gap-2 font-sans">
-            <Activity className="w-5 h-5 text-emerald-500 animate-pulse" />
+            <Activity className="w-5 h-5 text-zinc-400 animate-pulse" />
             Pulse API Guardian & Mock Lab
           </h2>
           <p className="text-xs text-slate-450 mt-1 max-w-2xl leading-relaxed">
@@ -178,7 +232,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
           <button
             onClick={runAllHeartbeatPings}
             disabled={isRefreshing}
-            className="px-4.5 py-3 cursor-pointer bg-gradient-to-r from-emerald-600 to-teal-500 hover:from-emerald-500 hover:to-teal-400 text-white font-mono font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-emerald-950/20 active:scale-95 transition-all disabled:opacity-50"
+            className="px-4.5 py-3 cursor-pointer bg-gradient-to-r from-zinc-800 to-zinc-900 hover:from-zinc-800 hover:to-blue-400 text-white font-mono font-black text-xs rounded-xl flex items-center justify-center gap-2 shadow-lg shadow-violet-950/20 active:scale-95 transition-all disabled:opacity-50"
           >
             <RefreshCw className={`w-3.5 h-3.5 ${isRefreshing ? 'animate-spin' : ''}`} />
             {isRefreshing ? 'PROBING VITAL ENDPOINTS...' : 'PING HEARTBEAT REGISTRY'}
@@ -203,7 +257,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
               onClick={() => { onTriggerSound(1.02); setActiveTab(tab.id as any); }}
               className={`px-3.5 py-2 text-[10.5px] font-mono font-bold rounded-xl whitespace-nowrap transition cursor-pointer border ${
                 activeTab === tab.id 
-                  ? 'bg-emerald-500/10 border-emerald-500/30 text-emerald-400 font-extrabold' 
+                  ? 'bg-zinc-800 border-white/10 text-zinc-300 font-extrabold' 
                   : 'bg-transparent border-transparent text-slate-500 hover:text-slate-300'
               }`}
             >
@@ -220,7 +274,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
             value={searchTerm}
             onChange={(e) => setSearchTerm(e.target.value)}
             placeholder="Filter APIs/contracts..."
-            className="w-full bg-[#030509] border border-slate-850/60 rounded-xl pl-9 pr-4 py-1.5 text-xs font-mono text-slate-300 placeholder:text-slate-650 focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
+            className="w-full bg-[#030509] border border-slate-850/60 rounded-xl pl-9 pr-4 py-1.5 text-xs font-mono text-slate-300 placeholder:text-slate-650 focus:outline-none focus:ring-1 focus:ring-violet-500/40"
           />
         </div>
       </div>
@@ -242,7 +296,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                   <div key={endpoint.id} className="bg-[#090b11] border border-slate-850/60 p-5 rounded-3xl space-y-4 relative overflow-hidden flex flex-col justify-between min-h-[220px]">
                     <div className="absolute top-0 right-0 p-2 bg-[#000]" style={{ borderBottomLeftRadius: '12px' }}>
                       <span className={`text-[8.5px] font-black uppercase px-2 py-0.5 rounded border ${
-                        endpoint.category === 'Internal' ? 'text-indigo-400 border-indigo-900/30 bg-indigo-950/20' : 'text-[#00ffd1] border-[#00ffd1]/20 bg-[#00ffd1]/5'
+                        endpoint.category === 'Internal' ? 'text-zinc-300 border-white/5 bg-white/5' : 'text-[#e4e4e7] border-[#e4e4e7]/20 bg-[#e4e4e7]/5'
                       }`}>
                         {endpoint.category}
                       </span>
@@ -251,7 +305,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                     <div>
                       <div className="flex items-center gap-2">
                         <span className={`w-2.5 h-2.5 rounded-full ${
-                          endpoint.status === 'HEALTHY' ? 'bg-emerald-500' : endpoint.status === 'DEGRADED' ? 'bg-amber-500 animate-pulse' : 'bg-red-500 animate-pulse'
+                          endpoint.status === 'HEALTHY' ? 'bg-zinc-800' : endpoint.status === 'DEGRADED' ? 'bg-amber-500 animate-pulse' : 'bg-red-500 animate-pulse'
                         }`} />
                         <h4 className="text-xs font-black text-slate-100 font-sans tracking-tight">{endpoint.name}</h4>
                       </div>
@@ -261,18 +315,16 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                     </div>
 
                     {/* MEDICAL ECG DYNAMIC DISPLAY */}
-                    <div className="h-10 bg-slate-950/60 border border-slate-900 p-1 rounded-2xl flex items-center overflow-hidden">
-                      <svg viewBox="0 0 300 30 animate-pulse" className={`w-full h-full stroke-2 fill-none ${
-                        endpoint.status === 'HEALTHY' ? 'text-emerald-500' : endpoint.status === 'DEGRADED' ? 'text-amber-500' : 'text-red-500'
-                      }`}>
-                        <path d={getEcgWaveformPath(endpoint.status)} />
-                      </svg>
+                    <div className={`h-10 bg-slate-950/60 border border-slate-900 p-1 rounded-2xl flex items-center overflow-hidden ${
+                      endpoint.status === 'HEALTHY' ? 'text-zinc-300' : endpoint.status === 'DEGRADED' ? 'text-amber-500' : 'text-rose-500'
+                    }`}>
+                      <EcgWaveform status={endpoint.status} p95={endpoint.p95} />
                     </div>
 
                     <div className="grid grid-cols-3 gap-2 text-center text-xs font-mono text-slate-500 border-t border-slate-900 pt-3">
                       <div>
                         <span className="block text-[8px] font-bold">UPTIME</span>
-                        <strong className="text-slate-205 text-[#00ffd1] mt-0.5 block">{endpoint.uptime}</strong>
+                        <strong className="text-slate-205 text-[#e4e4e7] mt-0.5 block">{endpoint.uptime}</strong>
                       </div>
                       <div>
                         <span className="block text-[8px] font-bold">LATENCY</span>
@@ -299,7 +351,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
           <div className="lg:col-span-6 bg-[#090b11] border border-slate-850/60 p-5 rounded-3xl space-y-4">
             <h3 className="text-xs font-bold text-white uppercase tracking-wider font-mono pb-2 border-b border-white/5 flex items-center justify-between">
               <span>SANDBOX API REQUEST BUILDER</span>
-              <span className="text-[10px] text-indigo-400 font-bold bg-[#000] px-2 py-0.5 rounded-lg border border-slate-900">
+              <span className="text-[10px] text-zinc-300 font-bold bg-[#000] px-2 py-0.5 rounded-lg border border-slate-900">
                 METHOD: {wbMethod}
               </span>
             </h3>
@@ -321,13 +373,13 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                 value={wbUrl}
                 onChange={e => setWbUrl(e.target.value)}
                 placeholder="https://api.devstate.os/v1/users"
-                className="flex-1 bg-slate-950 border border-slate-900 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-emerald-500/40"
+                className="flex-1 bg-slate-950 border border-slate-900 rounded-xl px-3.5 py-2 text-xs font-mono text-slate-200 focus:outline-none focus:ring-1 focus:ring-violet-500/40"
               />
 
               <button
                 onClick={executeWorkbenchRequest}
                 disabled={wbLoading}
-                className="px-4 py-2 cursor-pointer bg-emerald-650 hover:bg-emerald-550 bg-emerald-700 hover:bg-emerald-600 text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"
+                className="px-4 py-2 cursor-pointer bg-violet-650 hover:bg-violet-550 bg-violet-700 hover:bg-zinc-800 text-white font-mono font-bold text-xs rounded-xl flex items-center justify-center gap-1.5 transition active:scale-95 disabled:opacity-50"
               >
                 <Send className="w-3.5 h-3.5" />
                 {wbLoading ? 'CALLING...' : 'SEND'}
@@ -362,7 +414,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                 value={wbPayload}
                 onChange={e => setWbPayload(e.target.value)}
                 rows={5}
-                className="w-full bg-slate-950 border border-slate-900 rounded-xl p-3.5 text-xs font-mono text-emerald-400 focus:outline-none focus:ring-1 focus:ring-emerald-555/35 focus:ring-emerald-500/30 leading-relaxed"
+                className="w-full bg-slate-950 border border-slate-900 rounded-xl p-3.5 text-xs font-mono text-zinc-300 focus:outline-none focus:ring-1 focus:ring-violet-555/35 focus:ring-violet-500/30 leading-relaxed"
               />
             </div>
           </div>
@@ -374,7 +426,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                 <span className="text-xs font-bold text-slate-300 font-mono tracking-tight">RESPONSE DATA BLUEPRINT</span>
                 {wbStatus !== null && (
                   <span className={`text-[10px] font-black px-2.5 py-1 rounded-lg border font-mono ${
-                    wbStatus === 200 ? 'text-emerald-450 border-emerald-950/40 bg-emerald-950/20' : 'text-red-400 border-red-500/20 bg-red-500/5'
+                    wbStatus === 200 ? 'text-violet-450 border-violet-950/40 bg-white/5' : 'text-red-400 border-red-500/20 bg-red-500/5'
                   }`}>
                     STATUS_CODE: {wbStatus}
                   </span>
@@ -396,14 +448,14 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                           <button
                             key={lang}
                             onClick={() => setWbSelectedLanguage(lang)}
-                            className={`px-2 py-0.5 uppercase ${wbSelectedLanguage === lang ? 'bg-indigo-600/30 text-white font-extrabold' : 'text-slate-500 hover:text-slate-300'}`}
+                            className={`px-2 py-0.5 uppercase ${wbSelectedLanguage === lang ? 'bg-zinc-800 text-white font-extrabold' : 'text-slate-500 hover:text-slate-300'}`}
                           >
                             {lang}
                           </button>
                         ))}
                       </div>
                     </div>
-                    <pre className="text-[10px] leading-relaxed select-text font-mono text-[#00ffd1] bg-[#030509] border border-slate-900 p-3 rounded-xl overflow-x-auto">
+                    <pre className="text-[10px] leading-relaxed select-text font-mono text-[#e4e4e7] bg-[#030509] border border-slate-900 p-3 rounded-xl overflow-x-auto">
                       {getSimulatedCode(wbSelectedLanguage)}
                     </pre>
                   </div>
@@ -416,7 +468,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
             </div>
 
             <div className="p-3.5 bg-[#080b0f] rounded-2xl border border-slate-900 text-[10.5px] font-mono text-slate-500 flex items-start gap-2 relative overflow-hidden mt-6">
-              <Zap className="w-4 h-4 text-emerald-400 shrink-0 mt-0.5" />
+              <Zap className="w-4 h-4 text-zinc-300 shrink-0 mt-0.5" />
               <div>
                 <span className="text-slate-400 font-black block text-[9.5px]">AUTOMATED ASSERTIONS REPORT</span>
                 Response JSON schemas match production models. No active drift detected within the structural attributes.
@@ -441,7 +493,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                 <div key={idx} className="p-4 bg-slate-950/70 border border-slate-900 rounded-2xl flex flex-col sm:flex-row sm:items-center justify-between gap-4">
                   <div className="flex items-start gap-3">
                     <div className={`p-2.5 rounded-xl border ${
-                      item.spec_match ? 'bg-emerald-500/5 border-emerald-500/25 text-emerald-400' : 'bg-rose-500/5 border-rose-500/25 text-rose-500 animate-pulse'
+                      item.spec_match ? 'bg-zinc-800 border-white/10 text-zinc-300' : 'bg-rose-500/5 border-rose-500/25 text-rose-500 animate-pulse'
                     }`}>
                       <ShieldCheck className="w-4 h-4" />
                     </div>
@@ -455,7 +507,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                   </div>
 
                   <span className={`text-[8.5px] font-mono font-bold px-2 py-1 rounded border uppercase ${
-                    item.spec_match ? 'text-emerald-400 border-emerald-500/20 bg-emerald-500/5' : 'text-red-400 border-red-500/20 bg-red-500/5 animate-pulse'
+                    item.spec_match ? 'text-zinc-300 border-white/10 bg-zinc-800' : 'text-red-400 border-red-500/20 bg-red-500/5 animate-pulse'
                   }`}>
                     {item.spec_match ? 'SCHEMA MATCH' : 'DRIFT DETECTED'}
                   </span>
@@ -465,7 +517,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
           </div>
 
           <div className="lg:col-span-4 bg-slate-950 border border-slate-900 p-5 rounded-3xl text-center space-y-4 py-8">
-            <Code className="w-12 h-12 text-[#00ffd1] mx-auto stroke-1" />
+            <Code className="w-12 h-12 text-[#e4e4e7] mx-auto stroke-1" />
             <h4 className="text-xs font-sans font-bold text-slate-205">TYPES GENERATION SANDBOX</h4>
             <p className="text-[11px] font-mono text-slate-500">
               Instantly scaffold standard structural TypeScript types from active client OpenAPI specifications schemas.
@@ -494,7 +546,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
               <div>
                 <div className="flex justify-between text-xs font-mono text-slate-450 mb-1">
                   <span>ARTIFICIAL SIMULATED LATENCY</span>
-                  <strong className="text-[#00ffd1]">{mockLatency}ms</strong>
+                  <strong className="text-[#e4e4e7]">{mockLatency}ms</strong>
                 </div>
                 <input
                   type="range"
@@ -503,7 +555,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                   step="50"
                   value={mockLatency}
                   onChange={e => setMockLatency(Number(e.target.value))}
-                  className="w-full accent-[#00ffd1] cursor-pointer"
+                  className="w-full accent-[#e4e4e7] cursor-pointer"
                 />
               </div>
 
@@ -518,7 +570,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                       key={code}
                       onClick={() => { onTriggerSound(1.0); setMockStatusCode(code); }}
                       className={`flex-1 py-1.5 text-xs font-mono rounded-lg transition ${
-                        mockStatusCode === code ? 'bg-indigo-600/30 text-white font-extrabold border border-indigo-500/20' : 'text-slate-550'
+                        mockStatusCode === code ? 'bg-zinc-800 text-white font-extrabold border border-white/10' : 'text-slate-550'
                       }`}
                     >
                       {code}
@@ -535,7 +587,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
               <p className="text-[11px] font-mono text-slate-450 mt-1">
                 Share a local sandbox tunnel with your team securely for responsive interface alignments.
               </p>
-              <div className="bg-[#080b0f] p-2.5 rounded-xl border border-slate-900 text-xs font-mono text-[#00ffd1] mt-3 truncate">
+              <div className="bg-[#080b0f] p-2.5 rounded-xl border border-slate-900 text-xs font-mono text-[#e4e4e7] mt-3 truncate">
                 https://ais-pre-7vmrqrz...run.app/mocks/v1
               </div>
             </div>
@@ -566,12 +618,12 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
                   <div className="space-y-1">
                     <div className="flex items-center gap-2">
                       <span className="font-bold text-xs text-white">{item.event}</span>
-                      <span className="text-[9px] font-mono bg-indigo-950 text-indigo-400 px-1.5 py-0.5 rounded">
+                      <span className="text-[9px] font-mono bg-white/5 text-zinc-300 px-1.5 py-0.5 rounded">
                         {item.source}
                       </span>
                     </div>
                     <p className="text-[10px] text-slate-500 font-mono mt-1">Captured: {item.time}</p>
-                    <pre className="text-[10px] bg-[#000] p-2 rounded border border-slate-900 text-emerald-400 font-mono">
+                    <pre className="text-[10px] bg-[#000] p-2 rounded border border-slate-900 text-zinc-300 font-mono">
                       {item.payload}
                     </pre>
                   </div>
@@ -588,7 +640,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
           </div>
 
           <div className="lg:col-span-4 bg-slate-950 border border-slate-900 p-5 rounded-3xl text-center space-y-3 py-12">
-            <Send className="w-10 h-10 text-emerald-500 mx-auto stroke-1 animate-bounce" />
+            <Send className="w-10 h-10 text-zinc-400 mx-auto stroke-1 animate-bounce" />
             <h5 className="text-xs font-bold text-white font-sans">WEBHOOK.SITE TUNNEL</h5>
             <p className="text-[11px] font-mono text-slate-500">
               Instantly bind a live mock webhook URL directly. Trigger external callbacks to parse events layout.
@@ -615,11 +667,11 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
               <div key={i} className="space-y-1.5 font-mono text-xs">
                 <div className="flex justify-between">
                   <span className="text-slate-300 font-bold">{chain.label}</span>
-                  <span className="text-emerald-450 text-emerald-400">{chain.delay}</span>
+                  <span className="text-violet-450 text-zinc-300">{chain.delay}</span>
                 </div>
                 <div className="h-2 bg-[#000] border border-slate-900 rounded-full overflow-hidden">
                   <motion.div 
-                    className="h-full bg-gradient-to-r from-emerald-500 to-indigo-500"
+                    className="h-full bg-gradient-to-r from-zinc-800 to-zinc-900"
                     initial={{ width: 0 }}
                     animate={{ width: `${chain.pct}%` }}
                     transition={{ duration: 1.0, delay: i * 0.1 }}
@@ -636,7 +688,7 @@ export default function PulseApiGuardian({ onTriggerSound, onTriggerNotification
         <div className="bg-[#090b11] border border-slate-850/60 p-6 rounded-3xl space-y-4 animate-fade-in select-text">
           <span className="text-[10px] font-mono tracking-widest text-slate-500 uppercase font-bold block">Changelogs & Interactive specs Swagger</span>
           <div className="border border-slate-900 rounded-2xl bg-slate-950/60 p-5 text-xs font-mono space-y-3 leading-relaxed">
-            <div className="text-emerald-400 font-extrabold font-mono text-xs">API VERSION: V4.5 STABLE</div>
+            <div className="text-zinc-300 font-extrabold font-mono text-xs">API VERSION: V4.5 STABLE</div>
             <p className="text-slate-400">
               Generated OpenAPI specification v3.0.0. Intercepted traffic logs match specifications structure precisely.
             </p>

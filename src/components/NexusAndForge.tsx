@@ -223,6 +223,13 @@ export default function NexusAndForge({
     } else if (normalized.startsWith('git commit')) {
       responseOutput = `[main 7f20dbf] ${gitCommitMsg}\n 3 files changed, 204 insertions(+), 12 deletions(-)\n Staging stack auto-aligned.`;
       setGitFiles(prev => prev.map(f => f.status === 'staged' ? { ...f, status: 'staged' as const } : f).filter(f => f.status !== 'staged'));
+    } else if (normalized === 'scan history') {
+      responseOutput = 'WORKSPACE DIAGNOSTIC HISTORY (LAST 24 HOURS):\n\n[ERR-749] Cyclic Dependency Detected\nCircular import observed between src/components/NexusAndForge.tsx and src/App.tsx.\n\n[WRN-112] Unoptimized GPU Handlers\nThree.js canvas contexts in ArchitectureNebula are mounting without manual dispose handlers.\n\nTip: run > scan apply fixes <to automatically execute AI-suggested repairs>';
+      isSuccess = false;
+      autoFix = 'scan apply fixes';
+    } else if (normalized === 'scan apply fixes') {
+      responseOutput = 'Initializing autonomous AI self-healing pipelines...\n[OK] Automatically relocated shared states to \'src/store/\'.\n[OK] Attached automatic GL renderer dispose triggers to unmount cycles in root App.\n\nAll Workspace Scan anomalies successfully resolved. System optimal.';
+      isSuccess = true;
     } else if (normalized === 'diagnostics') {
       responseOutput = 'AUDITING WORKSPACE INTEGRITY HOST INBOUND INTERFACES:\n- Interface Node: localhost\n- Port Target: 3000\n- Ingress Status: ACTIVE CONNECTED\n- Encryption state: SECURE END-TO-END TLSv1.3\n- Health Grade: 100%';
     } else {
@@ -271,12 +278,51 @@ export default function NexusAndForge({
     setCmdHistoryCursor(-1);
   };
 
+  // Autocomplete dynamic calculation with project-files
+  const getAutocompleteSuggestions = () => {
+    const suggestions = [...autocompleteDatabase];
+    
+    // Add file path completions from workspace
+    gitFiles.forEach(f => {
+      suggestions.push({
+        cmd: `cat ${f.path}`,
+        desc: 'View workspace file content (Workspace Path)',
+        category: 'file'
+      });
+      suggestions.push({
+        cmd: `git add ${f.path}`,
+        desc: 'Stage specific workspace file',
+        category: 'git'
+      });
+      suggestions.push({
+        cmd: `nano ${f.path}`,
+        desc: 'Edit specific workspace file',
+        category: 'file'
+      });
+    });
+
+    // Add dynamically standard package tasks
+    suggestions.push({ cmd: 'npm run dev', desc: 'Initialize local dev server', category: 'npm' });
+    suggestions.push({ cmd: 'npm run clean', desc: 'Wipe artifacts', category: 'npm' });
+    suggestions.push({ cmd: 'npm run build', desc: 'Compile for production', category: 'npm' });
+    suggestions.push({ cmd: 'npm run test:e2e', desc: 'Execute end-to-end simulation test suite', category: 'npm' });
+
+    // AI Workspace Scan specific diagnostic commands
+    suggestions.push({ cmd: 'scan apply fixes', desc: 'Automatically execute AI-suggested repairs for recent diagnostic errors', category: 'ai-sys' });
+    suggestions.push({ cmd: 'scan history', desc: 'View past workspace architectural scan failures', category: 'ai-sys' });
+
+    return suggestions;
+  };
+
   // Keyboard autocomplete selector inside terminal inputs
   const handleKeyDown = (e: React.KeyboardEvent<HTMLInputElement>) => {
     if (e.key === 'Tab') {
       e.preventDefault();
-      // Simple autocompleter
-      const matched = autocompleteDatabase.find(i => i.cmd.startsWith(inputCmd));
+      const available = getAutocompleteSuggestions();
+      // Find matches where cmd starts with what user typed
+      const matches = available.filter(i => i.cmd.toLowerCase().startsWith(inputCmd.toLowerCase()));
+      // Find the first match that is strictly longer
+      const matched = matches.find(i => i.cmd.toLowerCase() !== inputCmd.toLowerCase()) || matches[0];
       if (matched) {
         setInputCmd(matched.cmd);
         onTriggerSound(1.1);
@@ -460,7 +506,7 @@ export default function NexusAndForge({
             onClick={() => { setActiveModule('nexus'); onTriggerSound(1.2); }}
             className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase font-mono flex items-center gap-2 transition duration-300 cursor-pointer ${
               activeModule === 'nexus' 
-                ? 'bg-[#00ffd1]/10 text-[#00ffd1] border border-[#00ffd1]/20 shadow-[0_0_15px_rgba(0,255,209,0.15)]' 
+                ? 'bg-[#e4e4e7]/10 text-[#e4e4e7] border border-[#e4e4e7]/20 shadow-[0_0_15px_rgba(0,255,209,0.15)]' 
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
@@ -472,24 +518,24 @@ export default function NexusAndForge({
             onClick={() => { setActiveModule('forge'); onTriggerSound(1.2); }}
             className={`px-5 py-2.5 rounded-xl text-xs font-black tracking-wider uppercase font-mono flex items-center gap-2 transition duration-300 cursor-pointer ${
               activeModule === 'forge' 
-                ? 'bg-[#00ffd1]/10 text-[#00ffd1] border border-[#00ffd1]/20 shadow-[0_0_15px_rgba(0,255,209,0.15)]' 
+                ? 'bg-[#e4e4e7]/10 text-[#e4e4e7] border border-[#e4e4e7]/20 shadow-[0_0_15px_rgba(0,255,209,0.15)]' 
                 : 'text-slate-400 hover:text-white hover:bg-white/5'
             }`}
           >
             <Activity className="w-3.5 h-3.5" />
             FORGE DEPLOYMENT HUD
-            <span className="h-2 w-2 rounded-full bg-emerald-400 animate-ping" />
+            <span className="h-2 w-2 rounded-full bg-zinc-700 animate-ping" />
           </button>
         </div>
 
         {/* Global project diagnostics state bar display */}
         <div className="hidden md:flex items-center gap-4 text-[10px] font-mono text-slate-400 px-4">
           <div className="flex items-center gap-1.5 bg-[#0d1520] border border-white/5 px-3 py-1 rounded-full">
-            <span className="h-1.5 w-1.5 bg-[#00ffd1] rounded-full animate-pulse" />
+            <span className="h-1.5 w-1.5 bg-[#e4e4e7] rounded-full animate-pulse" />
             <span>NEXUS CONSOLE: OPERATIONAL</span>
           </div>
           <div className="flex items-center gap-1.5 bg-[#0d1520] border border-white/5 px-3 py-1 rounded-full">
-            <span>REPOSITORY: <span className="text-indigo-400 font-bold">{githubRepo}</span></span>
+            <span>REPOSITORY: <span className="text-zinc-300 font-bold">{githubRepo}</span></span>
           </div>
         </div>
       </div>
@@ -502,7 +548,7 @@ export default function NexusAndForge({
           
           {/* TERMINAL HOUSING (8 Columns) */}
           <div className="col-span-12 lg:col-span-8 bg-[#080d14]/95 border border-[#2e4260]/30 rounded-3xl p-6 shadow-2xl flex flex-col relative overflow-hidden">
-            <div className="bg-gradient-to-r from-[#00ffd1]/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
+            <div className="bg-gradient-to-r from-[#e4e4e7]/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
             
             {/* Session Tabs row */}
             <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
@@ -513,11 +559,11 @@ export default function NexusAndForge({
                     onClick={() => { setActiveSessionId(s.id); onTriggerSound(1.1); }}
                     className={`flex items-center gap-2 border px-3 py-1.5 rounded-xl cursor-pointer text-xs font-mono transition duration-200 shrink-0 ${
                       activeSessionId === s.id 
-                        ? 'bg-[#0d1520] border-[#00ffd1]/40 text-[#00ffd1]' 
+                        ? 'bg-[#0d1520] border-[#e4e4e7]/40 text-[#e4e4e7]' 
                         : 'bg-transparent border-slate-900 text-slate-500 hover:text-slate-350 hover:border-slate-800'
                     }`}
                   >
-                    <span className={`w-1.5 h-1.5 rounded-full ${activeSessionId === s.id ? 'bg-[#00ffd1] animate-pulse' : 'bg-slate-700'}`} />
+                    <span className={`w-1.5 h-1.5 rounded-full ${activeSessionId === s.id ? 'bg-[#e4e4e7] animate-pulse' : 'bg-slate-700'}`} />
                     <span>{s.name}</span>
                     <button 
                       type="button" 
@@ -545,10 +591,10 @@ export default function NexusAndForge({
                 <button
                   type="button"
                   onClick={exportSessionAsScript}
-                  className="px-2.5 py-1 text-slate-400 hover:text-[#00ffd1] rounded-lg transition text-[10px] font-mono font-bold flex items-center gap-1.5"
+                  className="px-2.5 py-1 text-slate-400 hover:text-[#e4e4e7] rounded-lg transition text-[10px] font-mono font-bold flex items-center gap-1.5"
                   title="Export active terminal pipeline history as `.sh` shell execution sequence"
                 >
-                  <FolderDown className="w-3 h-3 text-[#00ffd1]" />
+                  <FolderDown className="w-3 h-3 text-[#e4e4e7]" />
                   EXPORT TRANSCRIPT
                 </button>
               </div>
@@ -559,7 +605,7 @@ export default function NexusAndForge({
               <button
                 type="button"
                 onClick={() => executeLocalCommand("git status")}
-                className="bg-[#0b121e]/80 hover:bg-[#111c2f]/80 text-[#00ffd1] font-mono text-[10px] font-black border border-[#2e4260]/30 px-3 py-2.5 rounded-xl transition duration-150 flex items-center gap-1.5 shadow-sm cursor-pointer hover:-translate-y-0.5"
+                className="bg-[#0b121e]/80 hover:bg-[#111c2f]/80 text-[#e4e4e7] font-mono text-[10px] font-black border border-[#2e4260]/30 px-3 py-2.5 rounded-xl transition duration-150 flex items-center gap-1.5 shadow-sm cursor-pointer hover:-translate-y-0.5"
               >
                 <GitBranch className="w-3.5 h-3.5 animate-pulse" />
                 GIT STATUS CHECK
@@ -606,7 +652,7 @@ export default function NexusAndForge({
                   onTriggerSound(1.05);
                 }}
                 placeholder="Filter terminal logs by keyword..."
-                className="w-full bg-[#020408] border border-[#2e4260]/30 rounded-xl pl-9 pr-14 py-2 text-xs text-slate-350 focus:outline-none focus:ring-1 focus:ring-[#00ffd1]/40 text-slate-200 font-mono"
+                className="w-full bg-[#020408] border border-[#2e4260]/30 rounded-xl pl-9 pr-14 py-2 text-xs text-slate-350 focus:outline-none focus:ring-1 focus:ring-[#e4e4e7]/40 text-slate-200 font-mono"
               />
               {terminalFilter && (
                 <button
@@ -624,7 +670,7 @@ export default function NexusAndForge({
 
             <div className="bg-[#020408] border border-[#233449]/40 rounded-2xl p-4 flex-1 min-h-[300px] max-h-[360px] overflow-y-auto space-y-4">
               <div className="border border-white/5 bg-slate-950/40 p-3 rounded-xl flex items-center justify-between text-[10px] font-mono text-slate-500 mb-2">
-                <span>TERMINAL_SESSION: <span className="text-[#00ffd1] font-bold">{activeSession.name.toUpperCase()}</span> | CONCURRENCY_LOCK: FALSE</span>
+                <span>TERMINAL_SESSION: <span className="text-[#e4e4e7] font-bold">{activeSession.name.toUpperCase()}</span> | CONCURRENCY_LOCK: FALSE</span>
                 <span>Active path: <span className="text-[#a78bfa] font-bold">{activeSession.activePath}</span></span>
               </div>
 
@@ -640,7 +686,7 @@ export default function NexusAndForge({
                   <div key={index} className="space-y-1.5 animate-fade-in border-l border-white/5 pl-3">
                     <div className="flex items-center justify-between text-[9.5px] font-mono text-slate-600 border-b border-white/5 pb-1 select-none">
                       <span className="flex items-center gap-1">
-                        <span className="text-[#00ffd1] font-extrabold">$</span>
+                        <span className="text-[#e4e4e7] font-extrabold">$</span>
                         <strong className="text-slate-300 font-bold">{hist.cmd}</strong>
                       </span>
                       <span className="flex items-center gap-3">
@@ -658,12 +704,19 @@ export default function NexusAndForge({
                       {hist.output}
                     </pre>
                     {hist.fix && (
-                      <div className="bg-[#00ffd1]/5 border border-[#00ffd1]/20 p-3.5 rounded-xl mt-2 text-[10px] text-white font-mono leading-relaxed relative">
-                        <div className="text-[#00ffd1] font-extrabold flex items-center gap-1.5 mb-1 text-[8.5px] uppercase tracking-wider">
+                      <div className="bg-[#e4e4e7]/5 border border-[#e4e4e7]/20 p-3.5 rounded-xl mt-2 text-[10px] text-white font-mono leading-relaxed relative">
+                        <div className="text-[#e4e4e7] font-extrabold flex items-center gap-1.5 mb-1 text-[8.5px] uppercase tracking-wider">
                           <Sparkles className="w-3.5 h-3.5 animate-pulse" />
                           AI Smart Suggested Auto-healing Alignment
                         </div>
-                        <p className="text-slate-350">{hist.fix}</p>
+                        <div className="flex items-center justify-between">
+                           <p className="text-slate-350">{hist.fix}</p>
+                           <button 
+                             onClick={() => executeLocalCommand(hist.fix!)} 
+                             className="px-3 py-1 bg-[#10b981]/20 hover:bg-[#10b981]/30 text-[#10b981] border border-[#10b981]/40 rounded-lg whitespace-nowrap transition-colors active:scale-95">
+                             RUN FIX
+                           </button>
+                         </div>
                       </div>
                     )}
                   </div>
@@ -682,7 +735,7 @@ export default function NexusAndForge({
               )}
 
               {terminalRunning && (
-                <div className="flex items-center gap-2 text-[#00ffd1] animate-pulse text-[10.5px] select-none font-mono">
+                <div className="flex items-center gap-2 text-[#e4e4e7] animate-pulse text-[10.5px] select-none font-mono">
                   <RefreshCw className="w-3.5 h-3.5 animate-spin" />
                   <span>Secure live pipeline execution transmission active...</span>
                 </div>
@@ -697,16 +750,16 @@ export default function NexusAndForge({
                   <span>FUZZY PATTERN CLUSTERS MATCH:</span>
                   <span>PRESS [TAB] TO AUTOMATICALLY CONSUME PATTERN</span>
                 </div>
-                {autocompleteDatabase
-                  .filter(item => item.cmd.toLowerCase().includes(inputCmd.toLowerCase()))
+                {getAutocompleteSuggestions()
+                  .filter(item => item.cmd.toLowerCase().includes(inputCmd.toLowerCase()) && inputCmd.length > 0)
                   .slice(0, 3)
                   .map((item, idx) => (
                     <div
                       key={idx}
                       onClick={() => { setInputCmd(item.cmd); onTriggerSound(1.1); }}
-                      className="p-2 hover:bg-[#0c1320] border border-transparent hover:border-[#00ffd1]/20 rounded-xl cursor-pointer flex items-center justify-between text-xs font-mono transition"
+                      className="p-2 hover:bg-[#0c1320] border border-transparent hover:border-[#e4e4e7]/20 rounded-xl cursor-pointer flex items-center justify-between text-xs font-mono transition"
                     >
-                      <span className="text-[#00ffd1] font-black">{item.cmd}</span>
+                      <span className="text-[#e4e4e7] font-black">{item.cmd}</span>
                       <span className="text-[10px] text-slate-400">{item.desc}</span>
                     </div>
                   ))
@@ -720,13 +773,13 @@ export default function NexusAndForge({
               className="mt-4 flex items-center gap-2"
             >
               <div className="relative flex-1 flex items-center">
-                <span className="absolute left-4 font-mono text-xs font-extrabold text-[#00ffd1] select-none">$</span>
+                <span className="absolute left-4 font-mono text-xs font-extrabold text-[#e4e4e7] select-none">$</span>
                 <input
                   type="text"
                   value={inputCmd}
                   onChange={(e) => setInputCmd(e.target.value)}
                   onKeyDown={handleKeyDown}
-                  className="bg-[#020408] border border-[#2e4260]/40 rounded-2xl pl-9 pr-4 py-3.5 text-xs text-[#00ffd1] placeholder-[#2e4260] focus:ring-1 focus:ring-[#00ffd1]/45 focus:border-[#00ffd1]/60 focus:outline-none font-mono flex-1 transition duration-200"
+                  className="bg-[#020408] border border-[#2e4260]/40 rounded-2xl pl-9 pr-4 py-3.5 text-xs text-[#e4e4e7] placeholder-[#2e4260] focus:ring-1 focus:ring-[#e4e4e7]/45 focus:border-[#e4e4e7]/60 focus:outline-none font-mono flex-1 transition duration-200"
                   placeholder="Inject execution instruction... (e.g., git add ., press [Tab] to autocomplete)"
                 />
               </div>
@@ -745,15 +798,15 @@ export default function NexusAndForge({
             
             {/* VIRTUAL STAGING HUB */}
             <div className="bg-[#080d14]/95 border border-[#2e4260]/30 rounded-3xl p-5 shadow-xl relative overflow-hidden">
-              <div className="bg-gradient-to-r from-[#00ffd1]/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
+              <div className="bg-gradient-to-r from-[#e4e4e7]/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
               <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-4">
                 <div className="flex items-center gap-2">
-                  <FolderGit2 className="w-4 h-4 text-[#00ffd1]" />
+                  <FolderGit2 className="w-4 h-4 text-[#e4e4e7]" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-300 font-mono">
                     Visual Git Ledger
                   </h4>
                 </div>
-                <span className="text-[8px] font-mono font-black text-[#00ffd1] bg-[#00ffd1]/10 px-2 py-0.5 rounded border border-[#00ffd1]/20">
+                <span className="text-[8px] font-mono font-black text-[#e4e4e7] bg-[#e4e4e7]/10 px-2 py-0.5 rounded border border-[#e4e4e7]/20">
                   {gitFiles.length} FILES
                 </span>
               </div>
@@ -765,7 +818,7 @@ export default function NexusAndForge({
                     key={idx}
                     className={`p-2.5 rounded-xl border flex items-center justify-between text-xs font-mono transition duration-300 ${
                       file.status === 'staged' 
-                        ? 'bg-[#00ffd1]/5 border-[#00ffd1]/20 text-[#00ffd1]' 
+                        ? 'bg-[#e4e4e7]/5 border-[#e4e4e7]/20 text-[#e4e4e7]' 
                         : file.status === 'unstaged' 
                           ? 'bg-[#ffb800]/5 border-[#ffb800]/25 text-[#ffb800]' 
                           : 'bg-white/5 border-white/5 text-slate-400'
@@ -781,7 +834,7 @@ export default function NexusAndForge({
                           onTriggerSound(1.35);
                           triggerNotification(`Staged/Unstaged: ${file.path}`, "info");
                         }}
-                        className="rounded border-[#2e4260]/40 text-[#00ffd1] focus:ring-[#00ffd1]/25 h-3.5 w-3.5 bg-slate-900 cursor-pointer"
+                        className="rounded border-[#2e4260]/40 text-[#e4e4e7] focus:ring-[#e4e4e7]/25 h-3.5 w-3.5 bg-slate-900 cursor-pointer"
                       />
                       <div className="truncate">
                         <span className="block font-bold text-[11px] truncate">{file.path}</span>
@@ -802,7 +855,7 @@ export default function NexusAndForge({
                 <textarea 
                   value={gitCommitMsg}
                   onChange={(e) => setGitCommitMsg(e.target.value)}
-                  className="w-full h-14 bg-slate-950 border border-[#2e4260]/40 rounded-xl p-2 font-mono text-[10.5px] text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#00ffd1]/40"
+                  className="w-full h-14 bg-slate-950 border border-[#2e4260]/40 rounded-xl p-2 font-mono text-[10.5px] text-slate-300 focus:outline-none focus:ring-1 focus:ring-[#e4e4e7]/40"
                   placeholder="Enter message for virtual repository staging alignment..."
                 />
                 
@@ -812,7 +865,7 @@ export default function NexusAndForge({
                     onClick={() => {
                       executeLocalCommand(`git commit -m "${gitCommitMsg}"`);
                     }}
-                    className="flex-1 bg-[#00ffd1]/10 text-[#00ffd1] border border-[#00ffd1]/30 hover:bg-[#00ffd1]/20 font-mono text-[10px] font-black py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
+                    className="flex-1 bg-[#e4e4e7]/10 text-[#e4e4e7] border border-[#e4e4e7]/30 hover:bg-[#e4e4e7]/20 font-mono text-[10px] font-black py-2.5 rounded-xl transition cursor-pointer flex items-center justify-center gap-1"
                   >
                     <GitMerge className="w-3.5 h-3.5" />
                     DISPATCH COMMIT
@@ -849,7 +902,7 @@ export default function NexusAndForge({
                     type="text"
                     value={snippetVar}
                     onChange={(e) => setSnippetVar(e.target.value)}
-                    className="w-full bg-[#020408] border border-white/5 rounded-lg px-2.5 py-1.5 font-mono text-[10px] text-[#00ffd1]"
+                    className="w-full bg-[#020408] border border-white/5 rounded-lg px-2.5 py-1.5 font-mono text-[10px] text-[#e4e4e7]"
                     placeholder="Enter value for {{message}}"
                   />
                 </div>
@@ -863,7 +916,7 @@ export default function NexusAndForge({
                           <span className="text-[10px] font-black text-slate-300 uppercase tracking-wider">{snip.name}</span>
                           <span className="text-[8px] font-mono text-slate-550 bg-slate-900 px-1.5 py-0.5 rounded leading-none text-slate-500 uppercase">{snip.category}</span>
                         </div>
-                        <code className="block text-[9.5px] font-mono text-indigo-400 truncate">{resolvedCmd}</code>
+                        <code className="block text-[9.5px] font-mono text-zinc-300 truncate">{resolvedCmd}</code>
                         
                         <div className="absolute right-2 top-2 hidden group-hover:flex items-center gap-1.5">
                           <button
@@ -935,7 +988,7 @@ export default function NexusAndForge({
                               c.status === act 
                                 ? act === 'pick' ? 'bg-[#39ff6a]/10 text-[#39ff6a] border border-[#39ff6a]/20'
                                   : act === 'squash' ? 'bg-[#ffb800]/10 text-[#ffb800] border border-[#ffb800]/20'
-                                    : act === 'edit' ? 'bg-[#00ffd1]/10 text-[#00ffd1] border border-[#00ffd1]/20'
+                                    : act === 'edit' ? 'bg-[#e4e4e7]/10 text-[#e4e4e7] border border-[#e4e4e7]/20'
                                       : 'bg-[#ff3d71]/10 text-[#ff3d71] border border-[#ff3d71]/20'
                                 : 'bg-slate-900 text-slate-400 border border-transparent hover:border-white/5'
                             }`}
@@ -965,10 +1018,10 @@ export default function NexusAndForge({
             
             {/* MULTI REPO ACTIVE INTEGRATION MATRIX */}
             <div className="bg-[#080d14]/95 border border-[#2e4260]/30 rounded-3xl p-6 shadow-2xl relative overflow-hidden">
-              <div className="bg-gradient-to-r from-[#00ffd1]/15 to-transparent h-1 w-full absolute top-0 left-0" />
+              <div className="bg-gradient-to-r from-[#e4e4e7]/15 to-transparent h-1 w-full absolute top-0 left-0" />
               <div className="flex items-center justify-between border-b border-white/5 pb-3 mb-4">
                 <div className="flex items-center gap-2">
-                  <Laptop className="w-4 h-4 text-[#00ffd1]" />
+                  <Laptop className="w-4 h-4 text-[#e4e4e7]" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-350 font-mono">
                     Sovereign Core Repository Matrix
                   </h4>
@@ -978,14 +1031,14 @@ export default function NexusAndForge({
 
               <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
                 {repos.map(r => (
-                  <div key={r.id} className="p-4 bg-slate-950 border border-white/5 rounded-2xl hover:border-[#00ffd1]/20 transition relative">
+                  <div key={r.id} className="p-4 bg-slate-950 border border-white/5 rounded-2xl hover:border-[#e4e4e7]/20 transition relative">
                     <div className="flex items-center justify-between mb-2">
                       <span className="text-[10px] uppercase font-mono text-slate-500 block truncate">{r.lang}</span>
                       <span className={`h-2 w-2 rounded-full ${r.status === 'online' ? 'bg-[#39ff6a]' : 'bg-[#ffb800]'} animate-pulse`} />
                     </div>
                     <span className="text-xs font-black text-slate-200 block truncate font-mono">{r.name}</span>
                     <div className="flex items-center justify-between mt-4 pt-3 border-t border-white/5 font-mono text-[10px]">
-                      <span className="text-slate-500">Last commit: <span className="text-indigo-400 font-bold">{r.lastCommit}</span></span>
+                      <span className="text-slate-500">Last commit: <span className="text-zinc-300 font-bold">{r.lastCommit}</span></span>
                       <span className="text-[#39ff6a] font-bold">♥ {r.health}% HEALTH</span>
                     </div>
                   </div>
@@ -1022,7 +1075,7 @@ export default function NexusAndForge({
                     <button
                       type="button"
                       onClick={startNASAForgeDeployment}
-                      className="bg-[#00ffd1]/10 text-[#00ffd1] border border-[#00ffd1]/30 hover:bg-[#00ffd1]/20 text-[10px] font-mono leading-none font-black px-5 py-3.5 rounded-2xl transition tracking-widest uppercase cursor-pointer flex items-center gap-1.5"
+                      className="bg-[#e4e4e7]/10 text-[#e4e4e7] border border-[#e4e4e7]/30 hover:bg-[#e4e4e7]/20 text-[10px] font-mono leading-none font-black px-5 py-3.5 rounded-2xl transition tracking-widest uppercase cursor-pointer flex items-center gap-1.5"
                     >
                       <Play className="w-3.5 h-3.5" />
                       COMMENCE SHIP SEQUENCE
@@ -1035,11 +1088,11 @@ export default function NexusAndForge({
               <div className="mb-8 font-mono select-none">
                 <div className="flex justify-between text-[10px] text-slate-400 mb-2">
                   <span>DEPLOY TOTAL PIPELINE ALIGNMENT PROGRESS:</span>
-                  <span className="text-[#00ffd1] font-black">{deployPercent}% READY</span>
+                  <span className="text-[#e4e4e7] font-black">{deployPercent}% READY</span>
                 </div>
                 <div className="w-full h-2.5 bg-slate-950 border border-white/5 rounded-full overflow-hidden p-0.5 shadow-inner">
                   <div 
-                    className="h-full bg-gradient-to-r from-[#00ffd1] via-[#a78bfa] to-[#ff3d71] rounded-full transition-all duration-300 relative shadow-[0_0_12px_#00ffd1]"
+                    className="h-full bg-gradient-to-r from-[#e4e4e7] via-[#a78bfa] to-[#ff3d71] rounded-full transition-all duration-300 relative shadow-[0_0_12px_#e4e4e7]"
                     style={{ width: `${deployPercent}%` }}
                   />
                 </div>
@@ -1094,7 +1147,7 @@ export default function NexusAndForge({
                         : log.includes('💀') || log.includes('ABORT') 
                           ? 'text-[#ff3d71]' 
                           : log.includes('running') || log.includes('Executing')
-                            ? 'text-indigo-400 font-bold'
+                            ? 'text-zinc-300 font-bold'
                             : 'text-slate-300'
                     }`}>{log}</p>
                   </div>
@@ -1130,7 +1183,7 @@ export default function NexusAndForge({
                   className={`p-1.5 px-3 rounded-lg text-[9px] font-mono font-black flex items-center gap-1 leading-none cursor-pointer transition ${
                     envLock 
                       ? 'bg-rose-950/40 text-[#ff3d71] border border-rose-910 border-rose-900/40 animate-pulse' 
-                      : 'bg-emerald-950/40 text-[#39ff6a] border border-emerald-900/40'
+                      : 'bg-white/5 text-[#39ff6a] border border-white/5'
                   }`}
                 >
                   {envLock ? <Lock className="w-3 h-3 text-[#ff3d71]" /> : <Unlock className="w-3 h-3 text-[#39ff6a]" />}
@@ -1145,7 +1198,7 @@ export default function NexusAndForge({
                 <div className="bg-[#020408] border border-white/5 p-3 rounded-xl flex items-center justify-between">
                   <div>
                     <span className="text-[10px] text-slate-500 block font-bold">DEVELOPMENT NODE</span>
-                    <span className="text-xs text-[#00ffd1] font-black">7f20dbf (Active local)</span>
+                    <span className="text-xs text-[#e4e4e7] font-black">7f20dbf (Active local)</span>
                   </div>
                   <span className="text-[9.5px] text-[#39ff6a] bg-[#39ff6a]/10 px-2.5 py-0.5 rounded border border-[#39ff6a]/20">
                     STABLE
@@ -1157,7 +1210,7 @@ export default function NexusAndForge({
                   <div className="flex items-center justify-between">
                     <div>
                       <span className="text-[10px] text-slate-500 block font-bold">STAGING NODE</span>
-                      <span className="text-xs text-indigo-300 font-black">6f9a2d1 (-1 commits drift)</span>
+                      <span className="text-xs text-zinc-200 font-black">6f9a2d1 (-1 commits drift)</span>
                     </div>
                     <span className="text-[9.5px] text-[#ffb800] bg-[#ffb800]/10 px-2.5 py-0.5 rounded border border-[#ffb800]/20 animate-pulse">
                       OUT OF SYNC
@@ -1206,10 +1259,10 @@ export default function NexusAndForge({
 
             {/* LIGHTHOUSE QUALITY DELTA SCORE COMPARISON CARD */}
             <div className="bg-[#080d14]/95 border border-[#2e4260]/30 rounded-3xl p-5 shadow-xl relative overflow-hidden">
-              <div className="bg-gradient-to-r from-violet-500/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
+              <div className="bg-gradient-to-r from-zinc-800/10 via-transparent to-transparent h-1 w-full absolute top-0 left-0" />
               <div className="flex items-center justify-between border-b border-white/5 pb-2.5 mb-4">
                 <div className="flex items-center gap-2">
-                  <BarChart3 className="w-4 h-4 text-violet-400" />
+                  <BarChart3 className="w-4 h-4 text-zinc-300" />
                   <h4 className="text-xs font-black uppercase tracking-widest text-slate-300 font-mono">
                     Performance Quality delta
                   </h4>
@@ -1239,8 +1292,8 @@ export default function NexusAndForge({
                     <span className="font-extrabold text-slate-350">Staged Bundle footprint:</span>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-500 line-through">{oldLightBox.size}</span>
-                      <span className="text-[#00ffd1] font-black">{newLightBox.size}</span>
-                      <span className="text-[9px] font-bold text-[#00ffd1] bg-[#00ffd1]/15 px-1 rounded">-5.8MB</span>
+                      <span className="text-[#e4e4e7] font-black">{newLightBox.size}</span>
+                      <span className="text-[9px] font-bold text-[#e4e4e7] bg-[#e4e4e7]/15 px-1 rounded">-5.8MB</span>
                     </div>
                   </div>
 
@@ -1249,15 +1302,15 @@ export default function NexusAndForge({
                     <span className="font-extrabold text-slate-350">P95 Client Latency status:</span>
                     <div className="flex items-center gap-2">
                       <span className="text-slate-500 line-through">{oldLightBox.latency}</span>
-                      <span className="text-violet-405 text-violet-400 font-extrabold">{newLightBox.latency}</span>
-                      <span className="text-[9px] font-bold text-violet-400 bg-violet-950/30 px-1 rounded">P95 SECURE</span>
+                      <span className="text-violet-405 text-zinc-300 font-extrabold">{newLightBox.latency}</span>
+                      <span className="text-[9px] font-bold text-zinc-300 bg-white/5 px-1 rounded">P95 SECURE</span>
                     </div>
                   </div>
                 </div>
 
-                <div className="p-2.5 bg-[#00ffd1]/5 border border-[#00ffd1]/25 rounded-xl flex items-start gap-2.5 text-[9.5px]">
-                  <TrendingUp className="w-4 h-4 text-[#00ffd1] shrink-0 mt-0.5" />
-                  <p className="leading-relaxed text-slate-300 font-semibold text-[#00ffd1]/95">
+                <div className="p-2.5 bg-[#e4e4e7]/5 border border-[#e4e4e7]/25 rounded-xl flex items-start gap-2.5 text-[9.5px]">
+                  <TrendingUp className="w-4 h-4 text-[#e4e4e7] shrink-0 mt-0.5" />
+                  <p className="leading-relaxed text-slate-300 font-semibold text-[#e4e4e7]/95">
                     Active build alignments have successfully reduced total AST logical cycle loads, dropping cold bootstrap speeds underneath the critical 200ms cockpit threshold.
                   </p>
                 </div>

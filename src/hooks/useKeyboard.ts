@@ -15,7 +15,11 @@ type PageType =
   | 'chaos'
   | 'sentinel'
   | 'pulse'
-  | 'vault';
+  | 'vault'
+  | 'reactor'
+  | 'cartographer'
+  | 'hydra'
+  | 'oracle';
 
 export function useKeyboard(
   setActivePage: (page: PageType) => void,
@@ -43,7 +47,11 @@ export function useKeyboard(
           '=': 'chaos',
           's': 'sentinel',
           'p': 'pulse',
-          'v': 'vault'
+          'v': 'vault',
+          'r': 'reactor',
+          'c': 'cartographer',
+          'h': 'hydra',
+          'o': 'oracle'
         };
 
         const targetPage = keyPageMapping[e.key.toLowerCase()];
@@ -72,7 +80,11 @@ export function useKeyboard(
               chaos: "Chaos & Threat Simulator (Alt+=)",
               sentinel: "Sentinel Security NOC Team (Alt+S)",
               pulse: "Pulse API Guardian Team (Alt+P)",
-              vault: "Vault Matrix Credentials (Alt+V)"
+              vault: "Vault Matrix Credentials (Alt+V)",
+              reactor: "Reactor Error Intelligence NOC (Alt+R)",
+              cartographer: "Cartographer Codebase Intelligence (Alt+C)",
+              hydra: "Hydra Performance Telemetry ICU (Alt+H)",
+              oracle: "Oracle AI Architect (Alt+O)"
             };
             onTriggerNotification(`Navigation Hotkey: Switched to ${prettyNames[targetPage]}`, "success");
           }
