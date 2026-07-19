@@ -3,6 +3,7 @@ import * as d3 from 'd3';
 import { 
   Play, Pause, RefreshCw, Cpu, Database, Sparkles, TrendingUp, BarChart3, AlertOctagon, RefreshCcw
 } from 'lucide-react';
+import { LineChart, Line, YAxis, ResponsiveContainer } from 'recharts';
 
 interface MetricData {
   id: number;
@@ -39,6 +40,9 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
   // Zoom transform state
   const [zoomTransform, setZoomTransform] = useState<d3.ZoomTransform>(d3.zoomIdentity);
   const svgRef = useRef<SVGSVGElement>(null);
+
+  // Real-time mini chart metrics for active workers
+  const [workerMiniHistory, setWorkerMiniHistory] = useState<{ time: number, avgMemory: number }[]>([]);
 
   // Real-time metrics history
   const [metrics, setMetrics] = useState<MetricData[]>(() => {
@@ -113,35 +117,54 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
         return updated;
       });
 
-      // Update worker processes details randomly
-      setWorkers(prev => prev.map(w => {
-        let status = w.status;
-        if (Math.random() > 0.8) {
-          const statuses: ('ACTIVE' | 'IDLE' | 'THROTTLED')[] = ['ACTIVE', 'IDLE', 'THROTTLED'];
-          status = statuses[Math.floor(Math.random() * statuses.length)];
-        }
-        
-        let cpuVal = 0;
-        let memVal = 32;
-        if (status === 'ACTIVE') {
-          cpuVal = Math.round((28 + Math.random() * 25) * cpuMultiplier);
-          memVal = Math.round(140 + Math.random() * 50);
-        } else if (status === 'THROTTLED') {
-          cpuVal = Math.round((5 + Math.random() * 10));
-          memVal = Math.round(60 + Math.random() * 20);
-        } else {
-          cpuVal = Math.round(1 + Math.random() * 3);
-          memVal = Math.round(40 + Math.random() * 10);
-        }
+      // We will compute active workers memory here first
+      let avgMem = 0;
 
-        return {
-          ...w,
-          status,
-          cpu: Math.min(100, cpuVal),
-          memory: Math.min(512, memVal),
-          processedCount: w.processedCount + (status === 'ACTIVE' ? Math.round(Math.random() * 3) : 0)
-        };
-      }));
+      // Update worker processes details randomly
+      setWorkers(prev => {
+        const updatedWorkers = prev.map(w => {
+          let status = w.status;
+          if (Math.random() > 0.8) {
+            const statuses: ('ACTIVE' | 'IDLE' | 'THROTTLED')[] = ['ACTIVE', 'IDLE', 'THROTTLED'];
+            status = statuses[Math.floor(Math.random() * statuses.length)];
+          }
+          
+          let cpuVal = 0;
+          let memVal = 32;
+          if (status === 'ACTIVE') {
+            cpuVal = Math.round((28 + Math.random() * 25) * cpuMultiplier);
+            memVal = Math.round(140 + Math.random() * 50);
+          } else if (status === 'THROTTLED') {
+            cpuVal = Math.round((5 + Math.random() * 10));
+            memVal = Math.round(60 + Math.random() * 20);
+          } else {
+            cpuVal = Math.round(1 + Math.random() * 3);
+            memVal = Math.round(40 + Math.random() * 10);
+          }
+
+          return {
+            ...w,
+            status,
+            cpu: Math.min(100, cpuVal),
+            memory: Math.min(512, memVal),
+            processedCount: w.processedCount + (status === 'ACTIVE' ? Math.round(Math.random() * 3) : 0)
+          };
+        });
+        
+        const activeWorkers = updatedWorkers.filter(w => w.status === 'ACTIVE');
+        avgMem = activeWorkers.length > 0 
+          ? activeWorkers.reduce((acc, curr) => acc + curr.memory, 0) / activeWorkers.length 
+          : 0;
+        
+        return updatedWorkers;
+      });
+      
+      // Track mini history for recharts active workers memory
+      setWorkerMiniHistory(prevHist => {
+        const newHist = [...prevHist, { time: Date.now(), avgMemory: avgMem }];
+        if (newHist.length > 15) newHist.shift(); // Keep last 15 points
+        return newHist;
+      });
 
     }, 2000);
 
@@ -435,39 +458,62 @@ export default function D3PerformanceChart({ onTriggerSound, onTriggerNotificati
       </div>
 
       {/* CORE WORKER SWARM GRID STATUSES */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5 mb-5 relative z-10">
-        {workers.map(w => {
-          const statusBgColor = w.status === 'ACTIVE' 
-            ? 'bg-zinc-800 border-white/10 text-zinc-300' 
-            : w.status === 'THROTTLED'
-            ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
-            : 'bg-slate-900 border-slate-850 text-slate-500';
+      <div className="flex flex-col gap-3 mb-5 relative z-10">
+        <div className="bg-[#090b11] border border-slate-900 rounded-2xl p-3 shadow-inner flex items-center justify-between">
+          <div className="text-[10px] font-mono text-slate-400 font-bold uppercase">
+            Active Worker Avg Memory Heap
+          </div>
+          <div className="w-48 h-8">
+            <ResponsiveContainer width="100%" height="100%">
+              <LineChart data={workerMiniHistory}>
+                <YAxis domain={['auto', 'auto']} hide />
+                <Line 
+                  type="monotone" 
+                  dataKey="avgMemory" 
+                  stroke="#a78bfa" 
+                  strokeWidth={2} 
+                  dot={false}
+                  isAnimationActive={false}
+                />
+              </LineChart>
+            </ResponsiveContainer>
+          </div>
+        </div>
 
-          return (
-            <div key={w.id} className="bg-[#090b11] border border-slate-900 p-3 rounded-2xl flex flex-col justify-between shadow-inner">
-              <div className="flex items-center justify-between gap-1">
-                <span className="text-[10px] font-mono text-slate-400 truncate font-semibold">{w.name}</span>
-                <span className={`text-[7px] font-bold font-mono px-1 py-0.5 rounded uppercase leading-none ${statusBgColor}`}>
-                  {w.status}
-                </span>
-              </div>
-              <div className="mt-2.5 flex items-end justify-between select-none">
-                <div>
-                  <span className="text-[11.5px] font-bold font-mono text-slate-105 tracking-tight block">
-                    {w.cpu}% <span className="text-[8px] text-slate-500">CPU</span>
-                  </span>
-                  <span className="text-[11.5px] font-bold font-mono text-slate-105 tracking-tight block mt-0.5">
-                    {w.memory}M <span className="text-[8px] text-slate-500">RAM</span>
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-2.5">
+          {workers.map(w => {
+            const statusBgColor = w.status === 'ACTIVE' 
+              ? 'bg-zinc-800 border-white/10 text-zinc-300' 
+              : w.status === 'THROTTLED'
+              ? 'bg-amber-500/10 border-amber-500/20 text-amber-400'
+              : 'bg-slate-900 border-slate-850 text-slate-500';
+
+            return (
+              <div key={w.id} className="bg-[#090b11] border border-slate-900 p-3 rounded-2xl flex flex-col justify-between shadow-inner">
+                <div className="flex items-center justify-between gap-1">
+                  <span className="text-[10px] font-mono text-slate-400 truncate font-semibold">{w.name}</span>
+                  <span className={`text-[7px] font-bold font-mono px-1 py-0.5 rounded uppercase leading-none ${statusBgColor}`}>
+                    {w.status}
                   </span>
                 </div>
-                <div className="text-right">
-                  <span className="text-[8px] font-mono text-slate-500 block uppercase font-bold">Processed</span>
-                  <span className="text-[9.5px] font-mono font-bold text-slate-350">{w.processedCount}</span>
+                <div className="mt-2.5 flex items-end justify-between select-none">
+                  <div>
+                    <span className="text-[11.5px] font-bold font-mono text-slate-105 tracking-tight block">
+                      {w.cpu}% <span className="text-[8px] text-slate-500">CPU</span>
+                    </span>
+                    <span className="text-[11.5px] font-bold font-mono text-slate-105 tracking-tight block mt-0.5">
+                      {w.memory}M <span className="text-[8px] text-slate-500">RAM</span>
+                    </span>
+                  </div>
+                  <div className="text-right">
+                    <span className="text-[8px] font-mono text-slate-500 block uppercase font-bold">Processed</span>
+                    <span className="text-[9.5px] font-mono font-bold text-slate-350">{w.processedCount}</span>
+                  </div>
                 </div>
               </div>
-            </div>
-          );
-        })}
+            );
+          })}
+        </div>
       </div>
 
       {/* THE D3 CHART SVG CONTAINER */}

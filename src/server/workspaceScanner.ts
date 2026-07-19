@@ -1,5 +1,6 @@
 import * as fs from 'fs';
 import * as path from 'path';
+import { analyzeFile } from './scanner/ast-parser';
 
 export interface PhysicalFile {
   relativePath: string;
@@ -7,6 +8,8 @@ export interface PhysicalFile {
   todos: { line: number; text: string }[];
   imports: string[];
   envVarsUsed: string[];
+  complexity?: number;
+  group?: 'service' | 'ui' | 'api' | 'config';
 }
 
 export interface WorkspaceSummary {
@@ -111,6 +114,11 @@ let lastSummary: WorkspaceSummary | null = null;
 let fileEditEventDetected = false;
 let watcherInitialized = false;
 
+let fileChangeCallback: ((filename: string) => void) | null = null;
+export function onWorkspaceFileChange(callback: (filename: string) => void) {
+  fileChangeCallback = callback;
+}
+
 function initWatcher(workspaceRoot: string) {
   if (watcherInitialized) return;
   watcherInitialized = true;
@@ -127,6 +135,9 @@ function initWatcher(workspaceRoot: string) {
           return;
         }
         fileEditEventDetected = true;
+        if (fileChangeCallback) {
+          fileChangeCallback(filename);
+        }
       }
     });
   } catch (err) {
@@ -247,47 +258,89 @@ export async function scanWorkspace(
       const fileTodos: { line: number; text: string }[] = [];
       const fileImports: string[] = [];
       const fileEnvVars: string[] = [];
+      let complexity = 0;
+      let group: 'service' | 'ui' | 'api' | 'config' = 'config';
+
+      // Assign groups
+      if (relPath.includes('src/components') || relPath.includes('src/store') || relPath.includes('src/hooks') || relPath.endsWith('App.tsx') || relPath.endsWith('main.tsx')) {
+        group = 'ui';
+      } else if (relPath.includes('server/') || relPath.endsWith('server.ts') || relPath.includes('apiHandler')) {
+        group = 'service';
+      } else if (relPath.includes('/api/')) {
+        group = 'api';
+      } else {
+        group = 'config';
+      }
+
+      const isTSorJS = ['.ts', '.tsx', '.js', '.jsx'].includes(fileExt);
 
       if (isSourceCode && stat.size < 1000 * 1000) { // skip very large files for safety
-        const fileContent = await fs.promises.readFile(fullPath, 'utf8');
-        const lines = fileContent.split('\n');
-
-        lines.forEach((lineText, idx) => {
-          const lineNum = idx + 1;
-
-          // Search for TODO comments
-          const todoMatch = lineText.match(/(?:\/\/|\/\*|\*|\#)\s*(TODO|FIXME|MOCK):\s*(.*)/i);
-          if (todoMatch) {
-            fileTodos.push({
-              line: lineNum,
-              text: todoMatch[1] + ': ' + todoMatch[2].trim(),
+        if (isTSorJS) {
+          try {
+            const astResult = analyzeFile(fullPath);
+            complexity = astResult.complexity;
+            
+            astResult.imports.forEach(imp => {
+              if (!imp.startsWith('.')) {
+                const parts = imp.split('/');
+                const rootPkg = parts[0].startsWith('@') && parts.length >= 2 ? `${parts[0]}/${parts[1]}` : parts[0];
+                fileImports.push(rootPkg);
+                allDeclaredImports.add(rootPkg);
+              }
             });
-            summary.todoCount++;
-          }
 
-          // Search for TS/JS imports (basic regex matching)
-          const importMatch = lineText.match(/import\s+(?:.*from\s+)?['"]([^'"]+)['"]/);
-          if (importMatch) {
-            const importPath = importMatch[1];
-            // Filter out relative imports
-            if (!importPath.startsWith('.')) {
-              // Strip sub-paths (e.g., 'react-dom/client' -> 'react-dom')
-              const parts = importPath.split('/');
-              const rootPkg = parts[0].startsWith('@') && parts.length >= 2 ? `${parts[0]}/${parts[1]}` : parts[0];
-              fileImports.push(rootPkg);
-              allDeclaredImports.add(rootPkg);
+            astResult.todos.forEach((todoText, idx) => {
+              fileTodos.push({
+                line: idx + 1,
+                text: 'TODO: ' + todoText
+              });
+              summary.todoCount++;
+            });
+          } catch (e) {
+            console.error(`AST analysis failed for ${relPath}, falling back:`, e);
+          }
+        } else {
+          const fileContent = await fs.promises.readFile(fullPath, 'utf8');
+          const lines = fileContent.split('\n');
+
+          lines.forEach((lineText, idx) => {
+            const lineNum = idx + 1;
+
+            // Search for TODO comments
+            const todoMatch = lineText.match(/(?:\/\/|\/\*|\*|\#)\s*(TODO|FIXME|MOCK):\s*(.*)/i);
+            if (todoMatch) {
+              fileTodos.push({
+                line: lineNum,
+                text: todoMatch[1] + ': ' + todoMatch[2].trim(),
+              });
+              summary.todoCount++;
             }
-          }
 
-          // Search for process.env or import.meta.env usage
-          const envMatches = lineText.matchAll(/(?:process\.env|import\.meta\.env)\.([A-Z0-9_]+)/g);
+            // Search for TS/JS imports (basic regex matching)
+            const importMatch = lineText.match(/import\s+(?:.*from\s+)?['"]([^'"]+)['"]/);
+            if (importMatch) {
+              const importPath = importMatch[1];
+              if (!importPath.startsWith('.')) {
+                const parts = importPath.split('/');
+                const rootPkg = parts[0].startsWith('@') && parts.length >= 2 ? `${parts[0]}/${parts[1]}` : parts[0];
+                fileImports.push(rootPkg);
+                allDeclaredImports.add(rootPkg);
+              }
+            }
+          });
+        }
+
+        // Always scan for environmental variables in file
+        try {
+          const fileContent = await fs.promises.readFile(fullPath, 'utf8');
+          const envMatches = fileContent.matchAll(/(?:process\.env|import\.meta\.env)\.([A-Z0-9_]+)/g);
           for (const ev of envMatches) {
             if (ev[1]) {
               fileEnvVars.push(ev[1]);
               allAccessedEnvVars.add(ev[1]);
             }
           }
-        });
+        } catch (_) {}
       }
 
       const physicalFileData: PhysicalFile = {
@@ -296,6 +349,8 @@ export async function scanWorkspace(
         todos: fileTodos,
         imports: [...new Set(fileImports)],
         envVarsUsed: [...new Set(fileEnvVars)],
+        complexity,
+        group
       };
 
       summary.files.push(physicalFileData);

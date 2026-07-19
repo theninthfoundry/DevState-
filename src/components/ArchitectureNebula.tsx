@@ -1,207 +1,130 @@
-import React, { useEffect, useRef, useState, useMemo } from 'react';
-import * as THREE from 'three';
-import { Canvas, useFrame } from '@react-three/fiber';
-import { OrbitControls, Html, Line } from '@react-three/drei';
-// @ts-ignore
-import { forceSimulation, forceLink, forceManyBody, forceCenter } from 'd3-force-3d';
+import React, { useState, useEffect } from 'react';
+import { Canvas } from '@react-three/fiber';
+import { OrbitControls } from '@react-three/drei';
 import { 
   Globe, Database, Cpu, Send, Fingerprint, Share2, 
   Zap, Workflow, Maximize2, ShieldAlert, Sparkles, Info
 } from 'lucide-react';
+import { InstancedNodes, NeuralNode } from './telemetry/InstancedNodes';
 
-interface SystemNode {
-  id: string;
+interface SystemNode extends NeuralNode {
   name: string;
   type: 'service' | 'api' | 'component' | 'database' | 'event';
-  group: 'frontend' | 'backend' | 'infra' | 'external';
   tech: string;
   status: 'online' | 'warning' | 'degraded';
   description: string;
-  load: number; // 0 to 1
-  instability: number; // 0 to 1
+  load: number;
+  instability: number;
   dependencies: string[];
-  x?: number; y?: number; z?: number;
-  vx?: number; vy?: number; vz?: number;
 }
 
 const CONST_NODES: SystemNode[] = [
-  { id: '1', name: 'Cognitive Runtime', type: 'service', group: 'backend', tech: 'Node.js/Bun/Fastify', status: 'online', description: 'Core scanning engine and dynamic AST compiler crawler.', load: 0.35, instability: 0.12, dependencies: ['2', '3', '6', '11'] },
-  { id: '2', name: 'Neural UI HUD', type: 'component', group: 'frontend', tech: 'React/Three.js/Tailwind', status: 'online', description: 'Immersive cockpit UI layer rendering canvas telemetry and reactive streams.', load: 0.85, instability: 0.28, dependencies: [] },
-  { id: '3', name: 'Gemini Agent Orchestrator', type: 'service', group: 'backend', tech: 'Gemini 3.5 Flash', status: 'online', description: 'Dynamic prompt chaining and autonomous codebase repair executor.', load: 0.62, instability: 0.45, dependencies: ['11'] },
-  { id: '4', name: '/api/github/pulls', type: 'api', group: 'backend', tech: 'REST v3 HTTPS', status: 'online', description: 'Git integration handler synchronizing active pull request statuses.', load: 0.18, instability: 0.08, dependencies: ['1'] },
-  { id: '5', name: 'Websocket Gateway', type: 'service', group: 'backend', tech: 'Socket.io Cluster', status: 'warning', description: 'Multiplexed event delivery bus transmitting active file updates.', load: 0.72, instability: 0.52, dependencies: ['1'] },
-  { id: '6', name: 'Prisma SQLite State', type: 'database', group: 'infra', tech: 'SQL database', status: 'online', description: 'Persistent storage for user sessions and telemetry histories.', load: 0.24, instability: 0.05, dependencies: [] },
-  { id: '7', name: 'Ghost System Detector', type: 'service', group: 'backend', tech: 'AST Crawler', status: 'online', description: 'Identifies unreachable routes and orphaned packages.', load: 0.12, instability: 0.15, dependencies: ['1'] },
-  { id: '8', name: 'Chaos Simulator API', type: 'api', group: 'external', tech: 'Express Endpoint', status: 'online', description: 'Injects network latency spikes and database lockouts.', load: 0.05, instability: 0.85, dependencies: ['1', '5'] },
-  { id: '9', name: 'Developer Flow Watcher', type: 'component', group: 'frontend', tech: 'Zustand Store', status: 'online', description: 'Accumulates developer typing speed and keyboard interval focus loops.', load: 0.41, instability: 0.18, dependencies: ['2'] },
-  { id: '10', name: 'AI Security Observatory', type: 'service', group: 'backend', tech: 'Semantic Scanners', status: 'online', description: 'Examines workspace directories for exposed credentials and unsafe routes.', load: 0.29, instability: 0.21, dependencies: ['3'] },
-  { id: '11', name: 'Local Vector DB Index', type: 'database', group: 'infra', tech: 'Memory Store', status: 'online', description: 'Stores mathematical file embeddings for lightning context recall.', load: 0.48, instability: 0.09, dependencies: [] }
+  { id: '1', name: 'Cognitive Runtime', type: 'service', group: 'service', tech: 'Node.js/Bun/Fastify', status: 'online', description: 'Core scanning engine and dynamic AST compiler crawler.', load: 0.35, instability: 0.12, dependencies: ['2', '3', '6', '11'], technicalDebt: 0.8 },
+  { id: '2', name: 'Neural UI HUD', type: 'component', group: 'ui', tech: 'React/Three.js/Tailwind', status: 'online', description: 'Immersive cockpit UI layer rendering canvas telemetry and reactive streams.', load: 0.85, instability: 0.28, dependencies: [], technicalDebt: 0.2 },
+  { id: '3', name: 'Gemini Agent Orchestrator', type: 'service', group: 'service', tech: 'Gemini 3.5 Flash', status: 'online', description: 'Dynamic prompt chaining and autonomous codebase repair executor.', load: 0.62, instability: 0.45, dependencies: ['11'], technicalDebt: 0.1 },
+  { id: '4', name: '/api/github/pulls', type: 'api', group: 'api', tech: 'REST v3 HTTPS', status: 'online', description: 'Git integration handler synchronizing active pull request statuses.', load: 0.18, instability: 0.08, dependencies: ['1'], technicalDebt: 0.5 },
+  { id: '5', name: 'Websocket Gateway', type: 'service', group: 'service', tech: 'Socket.io Cluster', status: 'warning', description: 'Multiplexed event delivery bus transmitting active file updates.', load: 0.72, instability: 0.52, dependencies: ['1'], technicalDebt: 0.9 },
+  { id: '6', name: 'Prisma SQLite State', type: 'database', group: 'config', tech: 'SQL database', status: 'online', description: 'Persistent storage for user sessions and telemetry histories.', load: 0.24, instability: 0.05, dependencies: [], technicalDebt: 0.3 },
+  { id: '7', name: 'Ghost System Detector', type: 'service', group: 'service', tech: 'AST Crawler', status: 'online', description: 'Identifies unreachable routes and orphaned packages.', load: 0.12, instability: 0.15, dependencies: ['1'], technicalDebt: 0.1 },
+  { id: '8', name: 'Chaos Simulator API', type: 'api', group: 'api', tech: 'Express Endpoint', status: 'online', description: 'Injects network latency spikes and database lockouts.', load: 0.05, instability: 0.85, dependencies: ['1', '5'], technicalDebt: 0.6 },
+  { id: '9', name: 'Developer Flow Watcher', type: 'component', group: 'ui', tech: 'Zustand Store', status: 'online', description: 'Accumulates developer typing speed and keyboard interval focus loops.', load: 0.41, instability: 0.18, dependencies: ['2'], technicalDebt: 0.2 },
+  { id: '10', name: 'AI Security Observatory', type: 'service', group: 'service', tech: 'Semantic Scanners', status: 'online', description: 'Examines workspace directories for exposed credentials and unsafe routes.', load: 0.29, instability: 0.21, dependencies: ['3'], technicalDebt: 0.4 },
+  { id: '11', name: 'Local Vector DB Index', type: 'database', group: 'config', tech: 'Memory Store', status: 'online', description: 'Stores mathematical file embeddings for lightning context recall.', load: 0.48, instability: 0.09, dependencies: [], technicalDebt: 0.1 }
 ];
-
-const NodeMaterial = {
-  uniforms: {
-    time: { value: 0 },
-    instability: { value: 0 },
-    baseColor: { value: new THREE.Color(0xa78bfa) }
-  },
-  vertexShader: `
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      vUv = uv;
-      vNormal = normalize(normalMatrix * normal);
-      gl_Position = projectionMatrix * modelViewMatrix * vec4(position, 1.0);
-    }
-  `,
-  fragmentShader: `
-    uniform float time;
-    uniform float instability;
-    uniform vec3 baseColor;
-    varying vec2 vUv;
-    varying vec3 vNormal;
-    void main() {
-      float intensity = pow(0.75 - dot(vNormal, vec3(0, 0, 1.0)), 2.0);
-      float pulse = sin(time * 3.0 * instability) * 0.5 + 0.5;
-      vec3 glow = baseColor * intensity * (1.0 + pulse * instability * 2.0);
-      gl_FragColor = vec4(glow + baseColor * 0.2, 0.8);
-    }
-  `
-};
-
-function NebulaGraph({ nodes, activePulse, selectedId, onSelect, gravityMultiplier }: any) {
-  const simNodes = useMemo(() => nodes.map((n: any) => ({ ...n, x: Math.random()*20-10, y: Math.random()*20-10, z: Math.random()*20-10 })), [nodes]);
-  const simLinks = useMemo(() => {
-    let links: any[] = [];
-    nodes.forEach((n: any) => {
-      n.dependencies.forEach((d: string) => {
-        if (nodes.find((target: any) => target.id === d)) {
-          links.push({ source: n.id, target: d });
-        }
-      });
-    });
-    return links;
-  }, [nodes]);
-
-  const simulationRef = useRef<any>(null);
-  const meshesRef = useRef<{ [key: string]: THREE.Mesh }>({});
-  const linksRef = useRef<{ [key: string]: any }>({});
-  
-  useEffect(() => {
-    const simulation = forceSimulation(simNodes as any)
-      .force('link', forceLink(simLinks).id((d: any) => d.id).distance(15))
-      .force('charge', forceManyBody().strength(-100 * gravityMultiplier))
-      .force('center', forceCenter(0, 0, 0));
-    
-    simulationRef.current = simulation;
-
-    return () => simulation.stop();
-  }, [simNodes, simLinks, gravityMultiplier]);
-
-  useFrame((state) => {
-    if (simulationRef.current) {
-      simulationRef.current.tick();
-      
-      const { clock } = state;
-      const t = clock.getElapsedTime();
-
-      // Update positions
-      simNodes.forEach((node: any) => {
-        const mesh = meshesRef.current[node.id];
-        if (mesh) {
-          // Add orbital noise if activePulse is on
-          const shake = activePulse ? Math.sin(t * 20 + node.id) * 0.5 : 0;
-          mesh.position.set(node.x, node.y + shake, node.z);
-          mesh.rotation.y += 0.01;
-          mesh.rotation.x += 0.005;
-
-          // Update shader uniforms
-          const material = mesh.material as THREE.ShaderMaterial;
-          if (material && material.uniforms) {
-            material.uniforms.time.value = t;
-          }
-        }
-      });
-
-      // Update links
-      simLinks.forEach((link: any, idx: number) => {
-        const line = linksRef.current[idx];
-        if (line) {
-          const positions = new Float32Array([
-            link.source.x, link.source.y, link.source.z,
-            link.target.x, link.target.y, link.target.z
-          ]);
-          line.geometry.setAttribute('position', new THREE.BufferAttribute(positions, 3));
-          line.geometry.attributes.position.needsUpdate = true;
-        }
-      });
-    }
-  });
-
-  const getColor = (node: SystemNode) => {
-    if (node.status === 'degraded') return new THREE.Color(0xef4444);
-    if (node.status === 'warning') return new THREE.Color(0xf59e0b);
-    if (node.type === 'database') return new THREE.Color(0x14b8a6);
-    if (node.type === 'api') return new THREE.Color(0x06b6d4);
-    return new THREE.Color(0xa78bfa);
-  };
-
-  return (
-    <group>
-      {simLinks.map((link: any, idx: number) => (
-        <line key={`link-${idx}`} ref={(el: any) => { linksRef.current[idx] = el; }}>
-          <bufferGeometry />
-          <lineBasicMaterial color={0x475569} transparent opacity={0.3} />
-        </line>
-      ))}
-
-      {simNodes.map((node: any) => (
-        <mesh 
-          key={node.id} 
-          ref={(el) => (meshesRef.current[node.id] = el as THREE.Mesh)}
-          onClick={(e) => { e.stopPropagation(); onSelect(node); }}
-          onPointerOver={(e) => { document.body.style.cursor = 'pointer'; }}
-          onPointerOut={(e) => { document.body.style.cursor = 'auto'; }}
-        >
-          <sphereGeometry args={[1 + node.load * 0.5, 32, 32]} />
-          <shaderMaterial 
-            vertexShader={NodeMaterial.vertexShader}
-            fragmentShader={NodeMaterial.fragmentShader}
-            uniforms={{
-              time: { value: 0 },
-              instability: { value: node.instability },
-              baseColor: { value: getColor(node) }
-            }}
-            transparent
-            depthWrite={false}
-            blending={THREE.AdditiveBlending}
-          />
-          {selectedId === node.id && (
-            <mesh>
-              <sphereGeometry args={[1.5 + node.load * 0.5, 32, 32]} />
-              <meshBasicMaterial color={getColor(node)} wireframe transparent opacity={0.5} />
-            </mesh>
-          )}
-          
-          <Html distanceFactor={25} className="pointer-events-none transition-opacity opacity-0 group-hover:opacity-100">
-            <div className={`px-2 py-1 text-[10px] font-mono whitespace-nowrap font-bold rounded border bg-black/80 backdrop-blur-md ${selectedId === node.id ? 'text-white border-violet-500' : 'text-slate-300 border-white/10'}`}>
-              {node.name}
-            </div>
-          </Html>
-        </mesh>
-      ))}
-    </group>
-  );
-}
 
 export default function ArchitectureNebula() {
   const [selectedNode, setSelectedNode] = useState<SystemNode>(CONST_NODES[0]);
   const [gravity, setGravity] = useState<number>(1.2);
+  const [chargeStrength, setChargeStrength] = useState<number>(-80);
+  const [linkDistance, setLinkDistance] = useState<number>(50);
   const [activePulse, setActivePulse] = useState<boolean>(false);
+  const [liveNodes, setLiveNodes] = useState<SystemNode[]>(CONST_NODES);
+  const [showParticleLabels, setShowParticleLabels] = useState<boolean>(true);
+
+  useEffect(() => {
+    // Establish WebSocket connection
+    const protocol = window.location.protocol === 'https:' ? 'wss:' : 'ws:';
+    const ws = new WebSocket(`${protocol}//${window.location.host}/telemetry`);
+
+    ws.onmessage = (event) => {
+      try {
+        const data = JSON.parse(event.data);
+        if (data.type === 'GRAPH_UPDATE') {
+          // Trigger the visual pulse
+          triggerTrafficPulse();
+          
+          if (data.payload && data.payload.summary && data.payload.summary.files) {
+            const files = data.payload.summary.files;
+            // Map the physical files into visual SystemNode items
+            const mappedNodes: SystemNode[] = files.map((file: any) => {
+              const todoCount = file.todos?.length || 0;
+              const hasComplexity = file.complexity || 0;
+              const technicalDebt = Math.min(0.9, (hasComplexity * 0.1) + (todoCount * 0.15) + (file.size > 20000 ? 0.15 : 0));
+              
+              const nodeGroup = file.group || 'config';
+              let type: 'service' | 'api' | 'component' | 'database' | 'event' = 'component';
+              if (nodeGroup === 'ui') type = 'component';
+              else if (nodeGroup === 'service') type = 'service';
+              else if (nodeGroup === 'api') type = 'api';
+              else type = 'database';
+
+              return {
+                id: file.relativePath,
+                name: file.relativePath,
+                type,
+                group: nodeGroup,
+                tech: file.relativePath.endsWith('.tsx') ? 'React + TSX' : file.relativePath.endsWith('.ts') ? 'TypeScript' : 'JSON/Config',
+                status: technicalDebt > 0.65 ? 'warning' : 'online',
+                description: `Size: ${(file.size / 1024).toFixed(1)} KB. Found ${todoCount} TODOs. Cognitive load (branches): ${hasComplexity}.`,
+                load: Math.min(0.95, 0.1 + (file.size / 50000)),
+                instability: Math.min(0.95, (todoCount * 0.1) + (hasComplexity * 0.05)),
+                dependencies: file.imports || [],
+                technicalDebt: technicalDebt || 0.1
+              };
+            });
+
+            // Adjust dependencies to refer to matched ids
+            mappedNodes.forEach(node => {
+              const matchedDeps: string[] = [];
+              const rawDeps = node.dependencies || [];
+              rawDeps.forEach((depPkg: string) => {
+                const found = mappedNodes.find(n => n.name.toLowerCase().includes(depPkg.toLowerCase()));
+                if (found) {
+                  matchedDeps.push(found.id);
+                }
+              });
+              node.dependencies = matchedDeps;
+            });
+
+            if (mappedNodes.length > 0) {
+              setLiveNodes(mappedNodes);
+            }
+          }
+        }
+      } catch (err) {
+        console.error('Failed to parse telemetry', err);
+      }
+    };
+
+    return () => ws.close();
+  }, []);
 
   const triggerTrafficPulse = () => {
     setActivePulse(true);
     setTimeout(() => setActivePulse(false), 1200);
   };
+
+  const simLinks = React.useMemo(() => {
+    let links: any[] = [];
+    liveNodes.forEach((n: any) => {
+      n.dependencies.forEach((d: string) => {
+        if (liveNodes.find((target: any) => target.id === d)) {
+          links.push({ source: n.id, target: d });
+        }
+      });
+    });
+    return links;
+  }, [liveNodes]);
 
   return (
     <div className="space-y-6">
@@ -226,11 +149,11 @@ export default function ArchitectureNebula() {
           
           <div className="flex items-center justify-between text-[10px] font-bold font-mono tracking-wider text-slate-500">
             <span className="uppercase">Systems Directory</span>
-            <span className="text-[#a78bfa] bg-[#a78bfa]/10 border border-[#a78bfa]/20 px-1.5 py-0.5 rounded-md font-black">{CONST_NODES.length} Nodes</span>
+            <span className="text-[#a78bfa] bg-[#a78bfa]/10 border border-[#a78bfa]/20 px-1.5 py-0.5 rounded-md font-black">{liveNodes.length} Nodes</span>
           </div>
 
           <div className="space-y-1.5 max-h-[380px] overflow-y-auto pr-1 custom-scrollbar">
-            {CONST_NODES.map((node) => {
+            {liveNodes.map((node) => {
               const isSelected = selectedNode.id === node.id;
               let typeColor = 'text-zinc-300 bg-white/5';
               if (node.type === 'api') typeColor = 'text-cyan-400 bg-cyan-950/15';
@@ -264,6 +187,42 @@ export default function ArchitectureNebula() {
               value={gravity} onChange={(e) => setGravity(Number(e.target.value))}
               className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-violet-500" 
             />
+
+            <div className="flex items-center justify-between text-slate-500 font-bold mt-2">
+              <span>Charge Strength</span>
+              <span className="text-[#a78bfa] font-black">{chargeStrength}</span>
+            </div>
+            <input 
+              type="range" min="-300" max="-10" step="5"
+              value={chargeStrength} onChange={(e) => setChargeStrength(Number(e.target.value))}
+              className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-violet-500" 
+            />
+
+            <div className="flex items-center justify-between text-slate-500 font-bold mt-2">
+              <span>Link Distance</span>
+              <span className="text-[#a78bfa] font-black">{linkDistance}px</span>
+            </div>
+            <input 
+              type="range" min="10" max="150" step="2"
+              value={linkDistance} onChange={(e) => setLinkDistance(Number(e.target.value))}
+              className="w-full h-1 bg-slate-900 rounded-lg appearance-none cursor-pointer accent-violet-500" 
+            />
+
+            <div className="flex items-center justify-between text-slate-500 font-bold mt-3.5 pt-3 border-t border-slate-900/40">
+              <span>Particle Labels</span>
+              <button
+                type="button"
+                id="btn-toggle-particle-labels"
+                onClick={() => setShowParticleLabels(!showParticleLabels)}
+                className={`px-2 py-0.5 rounded font-mono text-[9px] font-black uppercase tracking-wider transition-all cursor-pointer ${
+                  showParticleLabels
+                    ? 'bg-violet-500/10 text-violet-300 border border-violet-500/30'
+                    : 'bg-white/5 text-slate-500 border border-transparent'
+                }`}
+              >
+                {showParticleLabels ? 'Show All' : 'Hidden'}
+              </button>
+            </div>
           </div>
         </div>
 
@@ -280,14 +239,24 @@ export default function ArchitectureNebula() {
           <Canvas camera={{ position: [0, 5, 30], fov: 60 }} className="w-full h-full cursor-grab active:cursor-grabbing">
             <ambientLight intensity={0.5} />
             <pointLight position={[10, 10, 10]} intensity={1.5} />
-            <NebulaGraph 
-              nodes={CONST_NODES} 
-              activePulse={activePulse}
-              selectedId={selectedNode.id}
-              onSelect={setSelectedNode}
-              gravityMultiplier={gravity}
+            <OrbitControls 
+              enableDamping 
+              dampingFactor={0.05} 
+              minDistance={10}
+              maxDistance={100}
             />
-            <OrbitControls enableDamping dampingFactor={0.05} />
+            <InstancedNodes 
+              nodes={liveNodes} 
+              links={simLinks}
+              chargeStrength={chargeStrength}
+              linkDistance={linkDistance}
+              gravity={gravity}
+              showLabels={showParticleLabels}
+              onNodeSelect={(node) => {
+                const found = liveNodes.find(n => n.id === node.id);
+                if (found) setSelectedNode(found);
+              }}
+            />
           </Canvas>
 
           <div className="absolute top-4 right-4 flex items-center z-10">
@@ -334,7 +303,7 @@ export default function ArchitectureNebula() {
             <div className="flex items-center gap-1.5 text-[9px] font-mono font-bold uppercase text-slate-500 pb-1.5 border-b border-slate-900"><Fingerprint className="w-3.5 h-3.5 text-zinc-300"/> <span>Flow Proximity Links</span></div>
             <div className="flex flex-wrap items-center gap-1.5 pt-2">
               {selectedNode.dependencies.length > 0 ? selectedNode.dependencies.map(depId => {
-                const counterpart = CONST_NODES.find(n => n.id === depId);
+                const counterpart = liveNodes.find(n => n.id === depId);
                 return counterpart ? (
                   <span key={depId} className="px-2 py-0.5 bg-slate-900 border border-slate-850 hover:border-violet-605 text-[9px] text-slate-400 font-mono rounded font-bold flex items-center gap-1" title={counterpart.description}>
                     <Share2 className="w-2.5 h-2.5 text-violet-450" /> {counterpart.name}

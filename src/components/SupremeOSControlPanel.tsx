@@ -1,4 +1,4 @@
-import { motion, AnimatePresence, LayoutGroup } from 'framer-motion';
+import { motion, AnimatePresence, LayoutGroup } from 'motion/react';
 import React, { useState, useEffect, useRef } from 'react';
 import { 
   Cpu, 

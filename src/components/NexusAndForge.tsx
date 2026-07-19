@@ -7,7 +7,7 @@ import {
   Volume2, Trash, Save, Copy, FileText, ExternalLink, Zap, Lock, Unlock, 
   Gauge, TrendingUp, BarChart3, AlertOctagon, GitPullRequest, Sliders
 } from 'lucide-react';
-import { motion, AnimatePresence } from 'framer-motion';
+import { motion, AnimatePresence } from 'motion/react';
 
 // Defined types for Nexus and Forge
 interface TerminalSession {

@@ -326,7 +326,7 @@ export default function HydraPerformanceTelemetry({ onTriggerSound, onTriggerNot
               <div className="p-3.5 bg-slate-950 rounded-2xl border border-slate-900 font-mono text-[11px] text-slate-400 space-y-2">
                 <div className="font-extrabold text-slate-200">Recommended Optimization Actions:</div>
                 <ul className="list-disc pl-4 space-y-1 text-slate-450 list-inside text-[10.5px]">
-                  <li>Bundle chunk separation inside <code className="text-zinc-300">framer-motion</code>.</li>
+                  <li>Bundle chunk separation inside <code className="text-zinc-300">motion/react</code>.</li>
                   <li>Enable static gzip responses for telemetry assets payloads.</li>
                 </ul>
               </div>

@@ -1,249 +1,331 @@
-import React, { useState, useEffect } from 'react';
+import React, { useEffect, useState } from 'react';
 import { motion, AnimatePresence } from 'motion/react';
 import { 
   Terminal, ShieldAlert, GitBranch, Zap, Cpu, Settings, Activity, 
-  Database, Network, Flame, User, Layout, ChevronDown, ChevronRight, Keyboard
+  Database, Network, Flame, Sparkles, Search, Keyboard, Info, Eye
 } from 'lucide-react';
+import { useHUDStore } from './store/useHUDStore';
+import { useCommandDeck } from './hooks/useKeyboard';
+import { useAudioHUD } from './hooks/useAudioHUD';
 
-// Components
-import SystemLogs from './components/SystemLogs';
-import HotkeysModal from './components/HotkeysModal';
+// Navigation & Telemetry Components
+import { Sidebar } from './components/navigation/Sidebar';
+import { TerminalDock } from './components/telemetry/TerminalDock';
 import ArchitectureNebula from './components/ArchitectureNebula';
 import ProductGenomeFlow from './components/ProductGenomeFlow';
-import SentinelSecurity from './components/SentinelSecurity';
 import ChronicleDatabaseCockpit from './components/ChronicleDatabaseCockpit';
 import ChaosAndSecurity from './components/ChaosAndSecurity';
-import HydraPerformanceTelemetry from './components/HydraPerformanceTelemetry';
-import SupremeOSControlPanel from './components/SupremeOSControlPanel';
+
+// Redesigned AI engines
+import { SentinelEngine } from './components/engines/SentinelEngine';
+import { HydraEngine } from './components/engines/HydraEngine';
+import { ConfigEngine } from './components/engines/ConfigEngine';
+import { QuantumCIEngine } from './components/engines/QuantumCIEngine';
+
+// Modals
+import HotkeysModal from './components/HotkeysModal';
 
 export default function App() {
-  const [activeSystemId, setActiveSystemId] = useState('nebula');
-  const [isCommandPaletteOpen, setIsCommandPaletteOpen] = useState(false);
-  const [activeProject, setActiveProject] = useState('Sovereign OS');
-  const [activeEnv, setActiveEnv] = useState('PROD');
-  const [isTerminalOpen, setIsTerminalOpen] = useState(false);
-  const [isHotkeysOpen, setIsHotkeysOpen] = useState(false);
-  
-  // Fake state for notifications & github branches
-  const [isNotificationsOpen, setIsNotificationsOpen] = useState(false);
-  const githubBranches = [{name: 'main'}, {name: 'dev'}, {name: 'staging'}];
-  const [activeBranch, setActiveBranch] = useState('main');
+  const activeEngine = useHUDStore(s => s.activeEngine);
+  const setEngine = useHUDStore(s => s.setEngine);
+  const commandDeckOpen = useHUDStore(s => s.commandDeckOpen);
+  const toggleCommandDeck = useHUDStore(s => s.toggleCommandDeck);
+  const terminalOpen = useHUDStore(s => s.terminalOpen);
+  const setTerminalOpen = useHUDStore(s => s.setTerminalOpen);
+  const appendLog = useHUDStore(s => s.appendLog);
+  const metrics = useHUDStore(s => s.metrics);
+  const updateMetrics = useHUDStore(s => s.updateMetrics);
 
-  // Handle global Cmd+K for command palette
+  const { playSound } = useAudioHUD();
+  useCommandDeck();
+
+  // Local View state
+  const [isHotkeysOpen, setIsHotkeysOpen] = useState(false);
+  const [activeEnv, setActiveEnv] = useState('PROD');
+  const [activeBranch, setActiveBranch] = useState('main');
+  const [cmdSearch, setCmdSearch] = useState('');
+
+  // Initial stream population
   useEffect(() => {
-    const handleKeyDown = (e: KeyboardEvent) => {
-      if ((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k') {
-        e.preventDefault();
-        setIsCommandPaletteOpen(prev => !prev);
-      } else if (e.key === 'Escape') {
-        setIsCommandPaletteOpen(false);
-      }
+    playSound('success');
+    appendLog({ source: 'System', level: 'init', message: 'Booting DevState OS v2.4.0...' });
+    
+    const t1 = setTimeout(() => {
+      appendLog({ source: 'Gateway', level: 'info', message: 'Connecting to WebSocket Telemetry Hub at ws://localhost:3000/telemetry' });
+    }, 800);
+
+    const t2 = setTimeout(() => {
+      appendLog({ source: 'Scanner', level: 'warn', message: 'AST Parser detected 1 minor warning in configuration files.' });
+    }, 2000);
+
+    const t3 = setTimeout(() => {
+      appendLog({ source: 'Sentinel', level: 'success', message: 'Governance checks completed. Security rating at 99.8%.' });
+    }, 3200);
+
+    // Periodically fluctuate random telemetry stats cleanly
+    const metricInterval = setInterval(() => {
+      updateMetrics({
+        networkLatency: Math.max(8, Math.min(120, metrics.networkLatency + Math.floor(Math.random() * 11) - 5)),
+        cognitiveLoad: Math.max(5, Math.min(95, metrics.cognitiveLoad + Math.floor(Math.random() * 7) - 3))
+      });
+    }, 4500);
+
+    return () => {
+      clearTimeout(t1);
+      clearTimeout(t2);
+      clearTimeout(t3);
+      clearInterval(metricInterval);
     };
-    window.addEventListener('keydown', handleKeyDown);
-    return () => window.removeEventListener('keydown', handleKeyDown);
   }, []);
 
-  const NAVIGATION = [
-    { id: 'nebula', label: 'Architecture Nebula', icon: Network },
-    { id: 'sentinel', label: 'Sentinel Security', icon: ShieldAlert },
-    { id: 'genome', label: 'Genome Flow', icon: Activity },
-    { id: 'chronicle', label: 'Database Cockpit', icon: Database },
-    { id: 'chaos', label: 'Chaos Simulator', icon: Flame },
-    { id: 'hydra', label: 'Hydra Telemetry', icon: Zap },
-    { id: 'supreme', label: 'Supreme OS Config', icon: Settings },
+  const ENGINES_METADATA = [
+    { id: 'nebula', name: 'Architecture Nebula', icon: Network, desc: 'Interactive 3D simulation of AST abstract imports' },
+    { id: 'sentinel', name: 'Sentinel AI Guardian', icon: ShieldAlert, desc: 'Governance scanning & real-time threat parsing' },
+    { id: 'genome', name: 'Product Genome Flow', icon: Sparkles, desc: 'Interactive product structures and metrics flow' },
+    { id: 'chronicle', name: 'Database Cockpit', icon: Database, desc: 'Relational data inspector & chronicle activity dashboard' },
+    { id: 'chaos', name: 'Chaos Simulator', icon: Flame, desc: 'Active systems failure simulation & healing testbed' },
+    { id: 'hydra', name: 'Hydra Telemetry Matrix', icon: Activity, desc: 'High-density system performance radial indicators' },
+    { id: 'quantum-ci', name: 'Quantum CI Optimizer', icon: Zap, desc: 'Predictive module change test coverage tracer' },
+    { id: 'config', name: 'Supreme OS Config', icon: Settings, desc: 'System properties, authentication tokens & parameters' }
   ];
 
-  const handleSound = () => {};
-  const handleNotify = () => {};
+  const filteredEngines = ENGINES_METADATA.filter(e => 
+    e.name.toLowerCase().includes(cmdSearch.toLowerCase()) || 
+    e.desc.toLowerCase().includes(cmdSearch.toLowerCase())
+  );
 
   return (
-    <div className="flex flex-col h-screen overflow-hidden bg-[#090C10] text-[#f4f4f5] font-sans selection:bg-violet-500/30">
+    <div className="w-screen h-screen bg-[#020305] text-white flex flex-col overflow-hidden font-sans selection:bg-violet-500/30">
       
-      {/* TOPBAR (48px) - Exact match to previous styling */}
-      <header className="h-[48px] bg-[#09090b] border-b border-[#3f3f46] flex items-center justify-between px-4 z-40 shrink-0 shadow-sm relative">
-        {/* LEFT ZONE */}
-        <div className="flex items-center gap-0">
-          {/* Logo */}
-          <div className="flex items-center gap-2 mr-6 text-white font-black tracking-tighter text-lg">
-            <div className="relative flex items-center justify-center w-8 h-8 rounded-lg bg-gradient-to-br from-violet-600 to-indigo-700 shadow-lg shadow-violet-500/20 border border-white/10">
-              <Cpu className="w-5 h-5 text-white/90 stroke-[2.5px]" />
+      {/* Background ambient radial glow */}
+      <div className="fixed inset-0 bg-[radial-gradient(ellipse_at_top_right,_var(--tw-gradient-stops))] from-violet-950/10 via-[#020305] to-[#020305] pointer-events-none z-0" />
+      
+      {/* TOP HEADER STATUS BAR (48px) */}
+      <header className="h-[48px] bg-[#050609]/95 border-b border-white/5 flex items-center justify-between px-4 z-40 shrink-0 relative">
+        {/* Left branding zone */}
+        <div className="flex items-center gap-4">
+          <div className="flex items-center gap-2 mr-3 font-bold text-sm tracking-tight">
+            <div className="relative flex items-center justify-center w-7 h-7 rounded-lg bg-gradient-to-tr from-violet-600 to-indigo-700 shadow-lg shadow-violet-500/20 border border-white/10">
+              <Cpu className="w-4 h-4 text-white stroke-[2.5px]" />
             </div>
-            <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70">DEVSTATE</span>
-          </div>
-          
-          {/* Project Select */}
-          <div className="relative group mr-3 flex items-center gap-1.5 px-3 py-1.5 rounded-lg border border-transparent hover:border-[#3f3f46] hover:bg-[#18181b] cursor-pointer text-[13px] font-medium text-[#a1a1aa] hover:text-[#f4f4f5] transition-all">
-            <Layout className="w-4 h-4 text-violet-500 group-hover:text-violet-400 transition-colors" />
-            <span className="uppercase tracking-tight font-bold text-white shadow-sm">{activeProject}</span>
-            <ChevronDown className="w-3.5 h-3.5" />
+            <span className="bg-clip-text text-transparent bg-gradient-to-b from-white to-white/70 tracking-widest uppercase font-mono text-xs">DEVSTATE HUD</span>
           </div>
 
-          {/* Branch select */}
-          <div className="relative group flex items-center gap-1.5 px-2 py-1 rounded hover:bg-[#18181b] cursor-pointer text-[13px] text-[#a1a1aa] hover:text-[#f4f4f5] transition-colors">
-            <GitBranch className="w-3.5 h-3.5 text-[#a1a1aa] group-hover:text-[#a1a1aa]" />
+          {/* Environment Status Tag */}
+          <button 
+            onClick={() => {
+              playSound('click');
+              setActiveEnv(activeEnv === 'PROD' ? 'STAGING' : 'PROD');
+              appendLog({ source: 'Config', level: 'info', message: `Active workspace region pointed to: ${activeEnv === 'PROD' ? 'STAGING' : 'PROD'}` });
+            }}
+            onMouseEnter={() => playSound('hover')}
+            className={`text-[10px] font-mono font-bold uppercase border px-2 py-0.5 rounded cursor-pointer inline-flex items-center gap-1.5 transition-colors ${
+              activeEnv === 'PROD' 
+                ? 'bg-amber-500/10 text-amber-400 border-amber-500/30 hover:bg-amber-500/20' 
+                : 'bg-emerald-500/10 text-emerald-400 border-emerald-500/30 hover:bg-emerald-500/20'
+            }`}
+          >
+            <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> {activeEnv}
+          </button>
+
+          {/* GitHub Branch list */}
+          <div className="flex items-center gap-1 bg-white/5 border border-white/10 rounded px-2 py-0.5 text-xs text-slate-400">
+            <GitBranch className="w-3 h-3 text-slate-500" />
             <select
               value={activeBranch}
-              onChange={(e) => setActiveBranch(e.target.value)}
-              className="bg-transparent border-none p-0 outline-none hover:text-[#f4f4f5] focus:ring-0 text-[13px] font-medium pr-4 appearance-none cursor-pointer"
+              onChange={(e) => {
+                playSound('click');
+                setActiveBranch(e.target.value);
+                appendLog({ source: 'Git', level: 'info', message: `Checked out branch: ${e.target.value}` });
+              }}
+              className="bg-transparent border-none p-0 outline-none hover:text-white text-[11px] font-mono pr-2 cursor-pointer focus:ring-0"
             >
-              {githubBranches.map((b, i) => (
-                <option key={i} value={b.name} className="bg-[#09090b] text-white">{b.name}</option>
-              ))}
+              <option value="main" className="bg-[#050609] text-white">main</option>
+              <option value="dev" className="bg-[#050609] text-white">dev</option>
+              <option value="staging" className="bg-[#050609] text-white">staging</option>
             </select>
-            <div className="pointer-events-none absolute right-1 flex items-center text-[#a1a1aa] text-[8px] font-black">▼</div>
           </div>
         </div>
 
-        {/* CENTER ZONE */}
-        <div className="flex-1 max-w-[320px] relative hidden lg:block">
-          <div 
-            onClick={() => setIsCommandPaletteOpen(true)}
-            className="group w-full max-w-sm flex items-center justify-between px-4 py-1.5 bg-gradient-to-b from-[#181a1f] to-[#12141a] hover:from-[#1c212a] hover:to-[#161a22] border border-[#3f3f46]/60 hover:border-violet-500/50 rounded-xl text-[#a1a1aa] text-[13px] font-sans transition-all duration-300 cursor-pointer shadow-[0_0_0_transparent] hover:shadow-[0_0_20px_rgba(139,92,246,0.15)]"
+        {/* Global HUD Core Metric display for top bar */}
+        <div className="hidden md:flex items-center gap-6 font-mono text-[11px] text-slate-400">
+          <div className="flex items-center gap-2">
+            <Network className="w-3.5 h-3.5 text-violet-400" />
+            <span>LATENCY: <strong className="text-white">{metrics.networkLatency}ms</strong></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <Activity className="w-3.5 h-3.5 text-cyan-400" />
+            <span>COGNITIVE: <strong className="text-white">{metrics.cognitiveLoad}%</strong></span>
+          </div>
+          <div className="flex items-center gap-2">
+            <div className="w-2 h-2 rounded-full bg-emerald-500 animate-pulse" />
+            <span>NEURAL LINK: <strong className="text-emerald-400 font-bold">ONLINE</strong></span>
+          </div>
+        </div>
+
+        {/* Right shortcut zone */}
+        <div className="flex items-center gap-2">
+          {/* Terminal Toggle Button */}
+          <button 
+            id="btn-toggle-terminal-top"
+            onClick={() => {
+              playSound('click');
+              setTerminalOpen(!terminalOpen);
+            }}
+            onMouseEnter={() => playSound('hover')}
+            className={`flex items-center gap-1.5 px-2.5 py-1 text-xs rounded border transition-all duration-200 cursor-pointer ${
+              terminalOpen 
+                ? 'bg-violet-500/10 text-violet-300 border-violet-500/30 hover:bg-violet-500/20 shadow-[0_0_10px_rgba(139,92,246,0.1)]' 
+                : 'bg-white/5 text-slate-400 border-white/10 hover:bg-white/10 hover:text-white'
+            }`}
+            title={terminalOpen ? "Close Terminal" : "Open Terminal"}
           >
-            <div className="flex items-center gap-2">
-              <span className="opacity-70">Search everything...</span>
-            </div>
-            <div className="flex items-center gap-1 opacity-60">
-              <span className="px-1.5 py-0.5 rounded border border-[#3f3f46] text-[10px] uppercase font-bold text-slate-300">Cmd</span>
-              <span className="px-1.5 py-0.5 rounded border border-[#3f3f46] text-[10px] uppercase font-bold text-slate-300">K</span>
-            </div>
-          </div>
-        </div>
+            <Terminal className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Terminal</span>
+          </button>
 
-        {/* RIGHT ZONE */}
-        <div className="flex items-center gap-4">
-          <div className="relative group">
-            <span className={`text-[11px] font-bold uppercase border px-2 py-1 rounded-[6px] cursor-pointer inline-flex items-center gap-1 transition-colors ${activeEnv === 'PROD' ? 'bg-amber-500/15 text-amber-500 border-amber-500/20 hover:bg-amber-500/25' : 'bg-emerald-500/15 text-emerald-400 border-emerald-500/20 hover:bg-emerald-500/25'}`}>
-              <span className="w-1.5 h-1.5 rounded-full bg-current animate-pulse" /> {activeEnv} ▾
-            </span>
-          </div>
-
-          <div className="flex items-center gap-1.5 text-[12px] text-[#a1a1aa]">
-            <span className="w-2 h-2 rounded-full bg-[#3FB950]" />
-            <span>Healthy</span>
-          </div>
-
-          {/* Notifications */}
-          <div className="relative group cursor-pointer p-2 rounded-xl border border-transparent hover:border-[#3f3f46] hover:bg-[#18181b] transition-all" onClick={() => setIsNotificationsOpen(!isNotificationsOpen)}>
-            <span className="text-[16px]">🔔</span>
-            <span className="absolute top-0.5 right-0.5 bg-[#F85149] text-white text-[9px] w-4 h-4 rounded-full flex items-center justify-center font-bold shadow-[0_0_8px_rgba(248,81,73,0.6)]">3</span>
-          </div>
-
-          {/* Avatar */}
-          <div className="w-8 h-8 rounded-full border-2 border-[#3f3f46] bg-black text-[#6e7681] font-bold flex flex-col items-center justify-center select-none shadow-sm overflow-hidden bg-cover bg-center">
-            <User className="w-4 h-4 text-slate-400" />
-          </div>
+          <button 
+            onClick={() => {
+              playSound('click');
+              setIsHotkeysOpen(true);
+            }}
+            onMouseEnter={() => playSound('hover')}
+            className="flex items-center gap-1 px-2.5 py-1 text-xs text-slate-300 bg-white/5 hover:bg-white/10 rounded border border-white/10 transition-colors"
+          >
+            <Keyboard className="w-3.5 h-3.5" />
+            <span className="hidden sm:inline">Shortcuts</span>
+          </button>
         </div>
       </header>
 
-      {/* MAIN CONTENT SPLIT */}
-      <div className="flex flex-1 overflow-hidden relative">
+      {/* CORE SPLIT WORKSPACE */}
+      <div className="flex flex-1 overflow-hidden relative z-10">
         
-        {/* SIDEBAR */}
-        <aside className="w-[260px] bg-[#05060b] border-r border-[#3f3f46]/50 flex flex-col z-20 shrink-0">
-          <div className="p-4 border-b border-[#3f3f46]/30">
-            <h2 className="text-[10px] font-bold text-slate-500 uppercase tracking-widest mb-3">System Navigation</h2>
-            <div className="space-y-1">
-              {NAVIGATION.map((nav) => {
-                const Icon = nav.icon;
-                const isActive = activeSystemId === nav.id;
-                return (
-                  <button
-                    key={nav.id}
-                    onClick={() => setActiveSystemId(nav.id)}
-                    className={`w-full flex items-center gap-3 px-3 py-2 rounded-xl text-left text-sm transition-all group ${
-                      isActive 
-                        ? 'bg-violet-500/10 text-violet-400 font-medium' 
-                        : 'text-slate-400 hover:bg-[#18181b] hover:text-slate-200'
-                    }`}
-                  >
-                    <Icon className={`w-4 h-4 transition-colors ${isActive ? 'text-violet-500' : 'text-slate-500 group-hover:text-slate-300'}`} />
-                    <span className="flex-1">{nav.label}</span>
-                    {isActive && <div className="w-1.5 h-1.5 rounded-full bg-violet-400" />}
-                  </button>
-                )
-              })}
-            </div>
-          </div>
-          
-          <div className="p-4 mt-auto">
-            <button 
-              onClick={() => setIsTerminalOpen(!isTerminalOpen)}
-              className="w-full flex items-center justify-between px-3 py-2 rounded-xl border border-white/5 bg-white/[0.02] hover:bg-white/5 hover:border-white/10 text-sm font-medium text-slate-300 transition-all"
-            >
-              <div className="flex items-center gap-2">
-                <Terminal className="w-4 h-4 text-emerald-400" />
-                <span>Toggle Terminal</span>
-              </div>
-              <ChevronRight className={`w-4 h-4 transition-transform ${isTerminalOpen ? 'rotate-90' : ''}`}/>
-            </button>
-          </div>
-        </aside>
+        {/* Left Nav (Sidebar) */}
+        <Sidebar />
 
-        {/* COGNITION CANVAS MAIN AREA */}
-        <main className="flex-1 relative flex flex-col bg-[#010101]">
-          {/* Framer Motion stagger entrance for panels */}
-          <AnimatePresence mode="popLayout">
+        {/* Dynamic Center Workstation Viewport */}
+        <main className={`flex-1 relative transition-all duration-300 ${terminalOpen ? 'pb-48' : 'pb-0'} flex flex-col bg-[#010102]`}>
+          <AnimatePresence mode="wait">
             <motion.div
-              key={activeSystemId}
-              initial={{ opacity: 0, scale: 0.98, y: 15 }}
+              key={activeEngine}
+              initial={{ opacity: 0, scale: 0.985, y: 10 }}
               animate={{ opacity: 1, scale: 1, y: 0 }}
-              exit={{ opacity: 0, scale: 0.98, y: -15 }}
+              exit={{ opacity: 0, scale: 0.985, y: -10 }}
               transition={{ 
-                duration: 0.4, 
-                ease: [0.16, 1, 0.3, 1], // cinematic easing
-                delay: 0.2 // STAGGERED 0.2s DELAY AS REQUESTED
+                duration: 0.35, 
+                ease: [0.16, 1, 0.3, 1],
+                delay: 0.1
               }}
-              className="flex-1 overflow-auto custom-scrollbar relative"
+              className="flex-1 overflow-y-auto custom-scrollbar relative"
             >
-              {activeSystemId === 'nebula' && <ArchitectureNebula />}
-              {activeSystemId === 'sentinel' && <SentinelSecurity onTriggerSound={handleSound} onTriggerNotification={handleNotify} />}
-              {activeSystemId === 'genome' && <ProductGenomeFlow />}
-              {activeSystemId === 'chronicle' && <ChronicleDatabaseCockpit />}
-              {activeSystemId === 'chaos' && <ChaosAndSecurity />}
-              {activeSystemId === 'hydra' && <HydraPerformanceTelemetry onTriggerSound={handleSound} onTriggerNotification={handleNotify} />}
-              {activeSystemId === 'supreme' && <SupremeOSControlPanel />}
+              {activeEngine === 'nebula' && <ArchitectureNebula />}
+              {activeEngine === 'sentinel' && <SentinelEngine />}
+              {activeEngine === 'genome' && <ProductGenomeFlow />}
+              {activeEngine === 'chronicle' && <ChronicleDatabaseCockpit />}
+              {activeEngine === 'chaos' && <ChaosAndSecurity />}
+              {activeEngine === 'hydra' && <HydraEngine />}
+              {activeEngine === 'quantum-ci' && <QuantumCIEngine />}
+              {activeEngine === 'config' && <ConfigEngine />}
             </motion.div>
           </AnimatePresence>
         </main>
       </div>
 
-      {/* BOTTOM TERMINAL OVERLAY */}
+      {/* Live System Logs (Bottom Dock) */}
       <AnimatePresence>
-        {isTerminalOpen && (
-          <motion.div
-            initial={{ y: "100%" }}
-            animate={{ y: 0 }}
-            exit={{ y: "100%" }}
-            transition={{ type: 'spring', damping: 25, stiffness: 200 }}
-            className="fixed bottom-0 left-0 right-0 h-[300px] border-t border-[#3f3f46] bg-[#05060b] shadow-[0_-20px_40px_rgba(0,0,0,0.6)] z-50 flex"
+        {terminalOpen && <TerminalDock />}
+      </AnimatePresence>
+
+      {/* GLOBAL COMMAND DECK WINDOW PALETTE (CMD+K) */}
+      <AnimatePresence>
+        {commandDeckOpen && (
+          <motion.div 
+            initial={{ opacity: 0 }}
+            animate={{ opacity: 1 }}
+            exit={{ opacity: 0 }}
+            className="fixed inset-0 bg-black/80 backdrop-blur-md z-50 flex items-center justify-center p-4"
+            onClick={() => {
+              playSound('click');
+              toggleCommandDeck(false);
+            }}
           >
-            <div className="flex-1 flex overflow-hidden">
-              <div className="w-1/2 h-full border-r border-[#3f3f46]/50">
-                <SystemLogs />
+            <motion.div 
+              initial={{ scale: 0.93, y: 20 }}
+              animate={{ scale: 1, y: 0 }}
+              exit={{ scale: 0.93, y: 20 }}
+              transition={{ type: 'spring', damping: 25, stiffness: 220 }}
+              className="w-full max-w-lg bg-[#0c0e15] border border-white/10 rounded-2xl overflow-hidden shadow-[0_0_50px_rgba(139,92,246,0.2)]"
+              onClick={e => e.stopPropagation()}
+            >
+              {/* Search Bar */}
+              <div className="flex items-center gap-3 px-4 py-3.5 border-b border-white/5 bg-white/[0.01]">
+                <Search className="w-5 h-5 text-slate-500" />
+                <input 
+                  type="text"
+                  placeholder="Search cognitive engines..."
+                  value={cmdSearch}
+                  onChange={e => setCmdSearch(e.target.value)}
+                  autoFocus
+                  className="w-full bg-transparent border-none text-white outline-none placeholder-slate-600 text-sm focus:ring-0"
+                />
+                <button 
+                  onClick={() => {
+                    playSound('click');
+                    toggleCommandDeck(false);
+                  }}
+                  className="text-xs text-slate-500 hover:text-white px-1.5 py-0.5 rounded border border-white/10"
+                >
+                  ESC
+                </button>
               </div>
-              <div className="w-1/2 p-4 text-slate-400 font-mono text-xs overflow-y-auto bg-[#0d1117] flex flex-col">
-                <div className="text-cyan-400 font-bold mb-2 uppercase">Runtime Console</div>
-                <div>Node execution context mounted...</div>
-                <div>Websocket attached. Process PIDs monitored.</div>
+
+              {/* Engine Shortcuts */}
+              <div className="p-2 max-h-[320px] overflow-y-auto space-y-1 custom-scrollbar bg-black/40">
+                <div className="text-[10px] text-slate-500 font-bold uppercase tracking-widest px-3 py-1.5">Direct Engine Hop</div>
                 
-                <div className="mt-auto pt-4 border-t border-white/5 space-y-2">
-                  <div className="text-slate-500 uppercase tracking-widest text-[10px]">Shortcuts</div>
-                  <button 
-                    onClick={() => setIsHotkeysOpen(true)}
-                    className="flex items-center gap-2 px-3 py-1.5 bg-blue-500/10 border border-blue-500/20 text-blue-400 hover:bg-blue-500/20 rounded transition-colors"
-                  >
-                    <Keyboard className="w-3.5 h-3.5" />
-                    <span>View Hotkeys</span>
-                  </button>
-                </div>
+                {filteredEngines.length === 0 ? (
+                  <div className="text-xs text-slate-600 text-center py-6 font-mono">No matching engines identified</div>
+                ) : (
+                  filteredEngines.map((eng) => {
+                    const Icon = eng.icon;
+                    return (
+                      <button
+                        key={eng.id}
+                        onClick={() => {
+                          playSound('success');
+                          setEngine(eng.id as any);
+                          toggleCommandDeck(false);
+                        }}
+                        onMouseEnter={() => playSound('hover')}
+                        className="w-full text-left flex items-center gap-3 p-3 rounded-xl hover:bg-violet-500/10 group transition-colors"
+                      >
+                        <div className="p-2 rounded-lg bg-white/5 group-hover:bg-violet-500/20 text-slate-400 group-hover:text-violet-400 transition-colors">
+                          <Icon className="w-5 h-5" />
+                        </div>
+                        <div className="flex-1">
+                          <div className="text-xs font-bold text-white group-hover:text-violet-300 transition-colors">{eng.name}</div>
+                          <div className="text-[10px] text-slate-500 group-hover:text-slate-400 transition-colors mt-0.5">{eng.desc}</div>
+                        </div>
+                        <span className="text-[10px] text-slate-600 group-hover:text-violet-400 font-mono font-bold bg-[#18181b] group-hover:bg-violet-500/20 border border-white/5 hover:border-violet-500/30 px-2 py-0.5 rounded transition-all">ROUTE</span>
+                      </button>
+                    );
+                  })
+                )}
               </div>
-            </div>
+
+              <div className="px-4 py-2 bg-slate-950 font-mono text-[9px] text-slate-600 border-t border-white/5 uppercase tracking-wider flex justify-between">
+                <span>DevState Central Kernel</span>
+                <span>CMD+K shortcut master active</span>
+              </div>
+            </motion.div>
           </motion.div>
         )}
       </AnimatePresence>
 
-      <HotkeysModal isOpen={isHotkeysOpen} onClose={() => setIsHotkeysOpen(false)} />
+      {/* Keyboard Modal controller */}
+      <HotkeysModal isOpen={isHotkeysOpen} onClose={() => { playSound('click'); setIsHotkeysOpen(false); }} />
+
     </div>
   );
 }

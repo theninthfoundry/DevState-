@@ -26,7 +26,7 @@ export default function OracleAiArchitect({ onTriggerSound, onTriggerNotificatio
   const [radarObservability, setRadarObservability] = useState(81);
   const [radarResilience, setRadarResilience] = useState(85);
 
-  const triggerChat = (e: React.FormEvent) => {
+  const triggerChat = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!inputText.trim()) return;
 
@@ -36,47 +36,33 @@ export default function OracleAiArchitect({ onTriggerSound, onTriggerNotificatio
     setInputText('');
     setIsTyping(true);
 
-    setTimeout(() => {
+    try {
+      const response = await fetch("/api/architecture", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ prompt: userMsg }),
+      });
+      const data = await response.json();
       onTriggerSound(800);
-      let reply = "I have successfully processed your architecture request. I propose a structured multi-layer design to separate data layers. Here are the specifications:";
-      let codeBlock = undefined;
-
-      if (userMsg.toLowerCase().includes('billing') || userMsg.toLowerCase().includes('payment')) {
-        reply = "Design framework generated for secure stripe invoice payment gateways with resilient webhooks callbacks:";
-        codeBlock = `// src/server/billingService.ts
-import Stripe from 'stripe';
-
-export class ResilientBillingManager {
-  private stripe: Stripe;
-  
-  constructor(apiKey: string) {
-    this.stripe = new Stripe(apiKey, { apiVersion: '2023-10-16' });
-  }
-
-  public async generateSecureInvoice(customerId: string, cents: number) {
-    return await this.stripe.invoices.create({
-      customer: customerId,
-      auto_advance: true,
-      pending_invoice_item_interval: { interval: 'month' }
-    });
-  }
-}`;
-      } else {
-        codeBlock = `// src/components/OracleGeneratedService.tsx
-export function OracleComponent() {
-  return (
-    <div className="p-6 bg-white/5 border border-white/10 rounded-2xl">
-      <h4 className="font-extrabold text-zinc-300">Enterprise Scaffold Active</h4>
-      <p className="text-xs text-slate-400 mt-2">Architecture generated in modular separation.</p>
-    </div>
-  );
-}`;
+      
+      let replyText = data.text || "Failed to parse oracle's architecture transmission.";
+      
+      // If we have grounding chunks, format them
+      if (data.chunks && data.chunks.length > 0) {
+        replyText += "\n\nSearch References:\n" + data.chunks.map((c: any) => {
+          if (c.web) return `- [${c.web.title}](${c.web.uri})`;
+          return '';
+        }).filter(Boolean).join('\n');
       }
 
-      setChatMessages(prev => [...prev, { sender: 'oracle', text: reply, code: codeBlock }]);
-      setIsTyping(false);
+      setChatMessages(prev => [...prev, { sender: 'oracle', text: replyText }]);
       onTriggerNotification("Oracle returned architecture specifications schemas templates.", "success");
-    }, 1800);
+    } catch (e) {
+      setChatMessages(prev => [...prev, { sender: 'oracle', text: "Network anomaly detected. Access denied to Oracle." }]);
+      onTriggerNotification("Network failure connecting to core", "error");
+    } finally {
+      setIsTyping(false);
+    }
   };
 
   return (

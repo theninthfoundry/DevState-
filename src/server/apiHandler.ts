@@ -1,12 +1,17 @@
 import { scanWorkspace, getScanProgress } from "./workspaceScanner";
 import { analyzeProjectState, askAssistant, analyzeCognitionTool } from "./geminiService";
+import { PredictiveImpactAnalyzer } from "./scanner/impact-analyzer";
 import { execSync } from "child_process";
 import * as path from "path";
 import * as fs from "fs";
 
-const workspaceRoot = path.resolve(__dirname, "../../");
+const workspaceRoot = process.cwd();
+const impactAnalyzer = new PredictiveImpactAnalyzer(workspaceRoot);
 
 function getRequestBody(req: any): Promise<any> {
+  if (req.body && typeof req.body === 'object') {
+    return Promise.resolve(req.body);
+  }
   return new Promise((resolve) => {
     let body = "";
     req.on("data", (chunk: any) => {
@@ -100,6 +105,27 @@ export async function handleApiRequest(req: any, res: any) {
   }
 
   try {
+    if (pathname === "/api/ci/files" && req.method === "GET") {
+      impactAnalyzer.refreshGraph();
+      const files = impactAnalyzer.getAllSourceFiles();
+      const tests = impactAnalyzer.getAllTests();
+      sendResponse(res, 200, { success: true, files, tests });
+      return;
+    }
+
+    if (pathname === "/api/ci/impact" && req.method === "POST") {
+      const body = await getRequestBody(req);
+      const filePath = body.filePath || "";
+      if (!filePath) {
+        sendResponse(res, 400, { success: false, error: "Missing filePath parameter." });
+        return;
+      }
+      impactAnalyzer.refreshGraph();
+      const report = impactAnalyzer.calculateBlastRadius(filePath);
+      sendResponse(res, 200, { success: true, report });
+      return;
+    }
+
     if (pathname === "/api/workspace" && req.method === "GET") {
       const summary = await scanWorkspace(workspaceRoot);
       const vision = getPersistedVision();
