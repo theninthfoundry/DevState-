@@ -20,6 +20,15 @@ export interface TelemetryMetrics {
   networkLatency: number;
 }
 
+export interface CampSystemStatus {
+  uptime: number;
+  memory_mb: number;
+  queue_depth: number;
+  ticks_per_sec: number;
+  alerts_raised: number;
+  system_state: Record<string, any>;
+}
+
 interface HUDState {
   isOnline: boolean;
   activeEngine: 'nebula' | 'sentinel' | 'genome' | 'hydra' | 'config' | 'chronicle' | 'chaos' | 'supreme' | 'workspace' | 'pulse' | 'quantum-ci';
@@ -29,6 +38,12 @@ interface HUDState {
   metrics: TelemetryMetrics;
   logs: ActivityLog[];
   
+  // CAMP Telemetry state fields
+  agents: any[];
+  selectedAgentId: string | null;
+  systemStatus: CampSystemStatus | null;
+  alerts: any[];
+
   // Actions
   setEngine: (engine: HUDState['activeEngine']) => void;
   toggleCommandDeck: (isOpen?: boolean) => void;
@@ -36,6 +51,12 @@ interface HUDState {
   appendLog: (log: Omit<ActivityLog, 'id' | 'timestamp'>) => void;
   updateMetrics: (metrics: Partial<TelemetryMetrics>) => void;
   refuel: () => void;
+  
+  // CAMP Actions
+  setAgents: (agents: any[]) => void;
+  setSelectedAgentId: (id: string | null) => void;
+  setSystemStatus: (status: CampSystemStatus) => void;
+  setAlerts: (alerts: any[]) => void;
 }
 
 export const useHUDStore = create<HUDState>()(
@@ -55,11 +76,16 @@ export const useHUDStore = create<HUDState>()(
         networkLatency: 24,
       },
       logs: [],
+      
+      agents: [],
+      selectedAgentId: null,
+      systemStatus: null,
+      alerts: [],
 
       setEngine: (engine) => set({ activeEngine: engine }),
       
       toggleCommandDeck: (isOpen) => 
-        set((state) => ({ commandDeckOpen: isOpen ?? !state.commandDeckOpen })),
+         set((state) => ({ commandDeckOpen: isOpen ?? !state.commandDeckOpen })),
       
       setTerminalOpen: (isOpen) =>
         set({ terminalOpen: isOpen }),
@@ -81,6 +107,11 @@ export const useHUDStore = create<HUDState>()(
       refuel: () => set((state) => ({ 
         caffeineFuel: Math.min(100, state.caffeineFuel + 25) 
       })),
+
+      setAgents: (agents) => set({ agents }),
+      setSelectedAgentId: (id) => set({ selectedAgentId: id }),
+      setSystemStatus: (systemStatus) => set({ systemStatus }),
+      setAlerts: (alerts) => set({ alerts }),
     }),
     { 
       name: 'devstate-cognitive-store',
@@ -88,3 +119,4 @@ export const useHUDStore = create<HUDState>()(
     }
   )
 );
+

@@ -7,6 +7,8 @@ import {
 import { useHUDStore } from './store/useHUDStore';
 import { useCommandDeck } from './hooks/useKeyboard';
 import { useAudioHUD } from './hooks/useAudioHUD';
+import { useCampWebSocket } from './hooks/useCampWebSocket';
+
 
 // Navigation & Telemetry Components
 import { Sidebar } from './components/navigation/Sidebar';
@@ -38,6 +40,8 @@ export default function App() {
 
   const { playSound } = useAudioHUD();
   useCommandDeck();
+  useCampWebSocket();
+
 
   // Local View state
   const [isHotkeysOpen, setIsHotkeysOpen] = useState(false);
