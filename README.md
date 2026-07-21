@@ -1,6 +1,4 @@
-<div align="center">
-<img width="1200" height="470" alt="DevState Banner" src="https://ai.google.dev/static/site-assets/images/share-ais-513315318.png" />
-</div>
+
 
 # 🪐 DevState HUD
 ### The Cognitive Engineering Intelligence System & Developer Cockpit
